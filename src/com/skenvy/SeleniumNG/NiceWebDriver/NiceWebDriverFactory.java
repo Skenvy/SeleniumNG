@@ -9,6 +9,7 @@ import java.util.HashMap;
 import org.openqa.selenium.WebDriver;
 
 import com.skenvy.SeleniumNG.DomainConstants;
+import com.skenvy.SeleniumNG.NiceWebDriver.NiceDrivers.NiceChrome;
 
 
 public class NiceWebDriverFactory {
@@ -43,6 +44,7 @@ public class NiceWebDriverFactory {
 	
 	public static void main(String[] args) {
 		//AbstractDriverOptions??
+		System.out.println("哇");
 	}
 	
 	//Singleton body is defined, now define the factory method
@@ -58,7 +60,7 @@ public class NiceWebDriverFactory {
 	}
 	
 	private NiceWebDriver getNiceWebDriverInstanceForDriver(DriverExtension driverType) throws UnknownHostException {
-		return new NiceWebDriver();
+		return new NiceChrome("");
 	}
 	
 	/***

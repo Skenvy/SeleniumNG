@@ -2,6 +2,7 @@ package com.skenvy.SeleniumNG.NiceWebDriver;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -21,7 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
-public class NiceWebDriver {
+public abstract class NiceWebDriver {
 	
 	/***
 	 * Instance of WebDriver, instantiated as a ChromeDriver
@@ -43,76 +44,66 @@ public class NiceWebDriver {
 	 */
 	private final String localIP;
 	
-	public NiceWebDriver() throws UnknownHostException{
-		assignChromeDriver();
-		this.webDriver = getChrome(true,true);
+	//Constructors
+	
+	public NiceWebDriver(String optionArgs) throws UnknownHostException{
+		MutableCapabilities mutableCapabilities = makeBrowserOptions(optionArgs);
+		this.webDriver = getDriver(mutableCapabilities);
 		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 		this.localIP = InetAddress.getLocalHost().getHostAddress();
 	}
 	
-	public NiceWebDriver(int waitSeconds) throws UnknownHostException{
-		assignChromeDriver();
-		this.webDriver = getChrome(true,true);
+	public NiceWebDriver(int waitSeconds, String optionArgs) throws UnknownHostException{
+		MutableCapabilities mutableCapabilities = makeBrowserOptions(optionArgs);
+		this.webDriver = getDriver(mutableCapabilities);
 		this.wait = new WebDriverWait(this.webDriver,waitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 		this.localIP = InetAddress.getLocalHost().getHostAddress();
 	}
 	
-	public NiceWebDriver(String chromeDriverFilePath, int waitSeconds) throws UnknownHostException{
-		assignChromeDriver(chromeDriverFilePath);
-		this.webDriver = getChrome(true,true);
-		this.wait = new WebDriverWait(this.webDriver,waitSeconds);
-		this.jsExecutor = (JavascriptExecutor)this.webDriver;
-		this.localIP = InetAddress.getLocalHost().getHostAddress();
-	}
-	
-	public NiceWebDriver(String chromeDriverFilePath, int waitSeconds, RemoteWebDriver rwd) throws UnknownHostException{
-		assignChromeDriver(chromeDriverFilePath);
+	public NiceWebDriver(int waitSeconds, RemoteWebDriver rwd) throws UnknownHostException{
 		this.webDriver = rwd;
 		this.wait = new WebDriverWait(this.webDriver,waitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 		this.localIP = InetAddress.getLocalHost().getHostAddress();
 	}
 	
-	private static ChromeOptions makeChromeOptions(boolean incognito, boolean maxScreen) {
-		ChromeOptions options = new ChromeOptions();
-		String args = "";
-		if(incognito) {
-			args += "--incognito ";
-		}
-		if(maxScreen) {
-			args += "--start-maximized ";
-		}
-		options.addArguments(args);
-		return options;
-	}
+	//Abstracts
 	
-	private static WebDriver getChrome(boolean incognito, boolean maxScreen) {
-		ChromeOptions options = makeChromeOptions(incognito,maxScreen);
-		WebDriver wd = (new ChromeDriver(options));
-		return wd;
-	}
+	/***
+	 * Returns a subclass of MutableCapabilities according to the subclass of this NiceWebDriver
+	 * https://seleniumhq.github.io/selenium/docs/api/java/org/openqa/selenium/MutableCapabilities.html
+	 * @param optionArgs
+	 * @return
+	 */
+	protected abstract MutableCapabilities makeBrowserOptions(String optionArgs);
 	
-	public void closeChromeWindow() {
+	/***
+	 * Returns a webdriver appropriate to the subclass of this NiceWebDriver
+	 * @param mutableCapabilities
+	 * @return
+	 */
+	protected abstract WebDriver getDriver(MutableCapabilities mutableCapabilities);
+	
+	//Niceties
+	
+	/***
+	 * Close the web driver
+	 */
+	public void closeWebDriver() {
 		this.webDriver.close();
 	}
 	
-	/*
-	 * Assign the driver
+	/***
+	 * Check whether the web driver is a remote instance or not.
+	 * @return
 	 */
-	
 	public boolean isRunningRemotely() {
 		return (webDriver.getClass().getSimpleName().equals("RemoteWebDriver"));
 	}
-
-	private void assignChromeDriver(String chromeDriverFilePath) {
-		System.setProperty("webdriver.chrome.driver", chromeDriverFilePath);
-	}
 	
-	private void assignChromeDriver() {
-		this.assignChromeDriver(DomainConstants.defaultWebDriverSystemPaths.get(NiceWebDriverFactory.DriverExtension.Chrome));
-	}
+	//Open a page
 	
 	/***
 	 * Open a webpage!
@@ -120,10 +111,6 @@ public class NiceWebDriver {
 	 */
 	public void openWebPage(String url) {
 		this.webDriver.get(url);
-	}
-	
-	public boolean isWebPage404() {
-		return this.webDriver.getPageSource().contains("HTTP Status 404");
 	}
 	
 	/***
@@ -136,6 +123,8 @@ public class NiceWebDriver {
 	private void openPageOnIPPortContextRoot(String IP, int port, String contextRoot, String subrootQuery) {
 		this.openWebPage("http://"+IP+":"+port+"/"+contextRoot+"/"+subrootQuery);
 	}
+	
+	//Get Element
 	
 	/***
 	 * Returns a WebElement by using "BY", if it exists, after waiting for it's presence
@@ -188,6 +177,8 @@ public class NiceWebDriver {
 		return getWebElementByCSSIfExists(AnchorQueryStringForHREF(href, visibleOnly));
 	}
 	
+	//Click on a web element
+	
 	/*
 	 * Click !
 	 */
@@ -219,10 +210,13 @@ public class NiceWebDriver {
 		return clickANonNullWebElement(getWebElementByAnchorWithHrefIfExists(href,visibleOnly));
 	}
 	
+	//Send keys!
+	
 	public void sendKeysToAWebElement(WebElement we, String keyStrokes) {
 		we.sendKeys(keyStrokes);
 	}
 	
+	//Continue to format
 	
 	/*
 	 * Check for the presence of an <a [href ...] ...>
@@ -245,20 +239,6 @@ public class NiceWebDriver {
 		return (getWebElementByAnchorWithHrefIfExists(href,visibleOnly) != null);
 	}
 	
-	/*
-	 * Yea
-	 */
-	
-	private void clickAcceptIfTCSNoticePage() {
-		try {
-			String baseUrl = (new URI(this.webDriver.getCurrentUrl())).getHost();
-			this.clickOnCSSElementIfExists("a[href*=\""+baseUrl+"\"][onClick=\"Accept();\"]");
-		} catch (URISyntaxException e) {
-			System.err.println("Failed to obtain the defaultr authority of the current webdriver's open URL");
-			e.printStackTrace();
-		}
-	}
-	
 	public boolean confirmCurrentPageIs(String expectedSubroot) {
 		try {
 			String subroot = (new URI(this.webDriver.getCurrentUrl())).getPath();
@@ -277,7 +257,6 @@ public class NiceWebDriver {
 	
 	public void openLocalWebPageWithSubroot(String webContextRoot, String subrootQuery) {
 		this.openPageOnIPPortContextRoot(this.localIP, DomainConstants.localDefault.environPort, webContextRoot,subrootQuery);
-		this.clickAcceptIfTCSNoticePage();
 	}
 	
 	public void openLocalWebPageAtBase(String webContextRoot) {
@@ -302,21 +281,14 @@ public class NiceWebDriver {
 	
 	public void openTestDefaultWithSubroot(String subrootQuery) {
 		this.openPageOnIPPortContextRoot(DomainConstants.testDefault.environIP, DomainConstants.testDefault.environPort, DomainConstants.testDefault.webContextRoot, subrootQuery);
-		this.clickAcceptIfTCSNoticePage();
 	}
 	
 	public void openTestDefaultAtBase() {
 		this.openTestDefaultWithSubroot("");
 	}
 	
-	
-	
-	public static void main(String[] args) throws UnknownHostException {
-		WebDriver a = new ChromeDriver();
-		
-		//ChromeWrapper chr = new ChromeWrapper();
-		//chr.openLocalDefaultWebContextRootAtBase();
-		
+	public boolean isWebPage404() {
+		return this.webDriver.getPageSource().contains("HTTP Status 404");
 	}
 
 }
