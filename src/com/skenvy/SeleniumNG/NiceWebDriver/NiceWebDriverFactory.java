@@ -2,6 +2,7 @@ package com.skenvy.SeleniumNG.NiceWebDriver;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;

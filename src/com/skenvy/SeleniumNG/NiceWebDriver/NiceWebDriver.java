@@ -40,33 +40,60 @@ public abstract class NiceWebDriver {
 	private final JavascriptExecutor jsExecutor;
 	
 	/***
-	 * Stores the local host address.
+	 * 
 	 */
-	private final String localIP;
+	private String localIP = null;
 	
-	//Constructors
+	// Constructors
 	
-	public NiceWebDriver(String optionArgs) throws UnknownHostException{
+	/***
+	 * Constructor which only takes the option arguments to be handed to the "Browser"-Options
+	 * @param optionArgs
+	 * @throws UnknownHostException
+	 */
+	public NiceWebDriver(String optionArgs){
 		MutableCapabilities mutableCapabilities = makeBrowserOptions(optionArgs);
 		this.webDriver = getDriver(mutableCapabilities);
 		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
-		this.localIP = InetAddress.getLocalHost().getHostAddress();
 	}
 	
-	public NiceWebDriver(int waitSeconds, String optionArgs) throws UnknownHostException{
+	/***
+	 * Constructor which only takes an instance of the RemoteWebDriver
+	 * @param remoteWebDriver
+	 * @throws UnknownHostException
+	 */
+	public NiceWebDriver(RemoteWebDriver remoteWebDriver){
+		this.webDriver = remoteWebDriver;
+		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
+		this.jsExecutor = (JavascriptExecutor)this.webDriver;
+	}
+	
+	/***
+	 * Constructor which takes the option arguments to be handed to the "Browser"-Options,
+	 * as well as a defined wait time in seconds
+	 * @param waitSeconds
+	 * @param optionArgs
+	 * @throws UnknownHostException
+	 */
+	public NiceWebDriver(String optionArgs, int waitSeconds){
 		MutableCapabilities mutableCapabilities = makeBrowserOptions(optionArgs);
 		this.webDriver = getDriver(mutableCapabilities);
 		this.wait = new WebDriverWait(this.webDriver,waitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
-		this.localIP = InetAddress.getLocalHost().getHostAddress();
 	}
 	
-	public NiceWebDriver(int waitSeconds, RemoteWebDriver rwd) throws UnknownHostException{
-		this.webDriver = rwd;
+	/***
+	 * Constructor which only takes an instance of the RemoteWebDriver,
+	 * as well as a defined wait time in seconds
+	 * @param waitSeconds
+	 * @param rwd
+	 * @throws UnknownHostException
+	 */
+	public NiceWebDriver(RemoteWebDriver remoteWebDriver, int waitSeconds){
+		this.webDriver = remoteWebDriver;
 		this.wait = new WebDriverWait(this.webDriver,waitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
-		this.localIP = InetAddress.getLocalHost().getHostAddress();
 	}
 	
 	//Abstracts
@@ -103,7 +130,7 @@ public abstract class NiceWebDriver {
 		return (webDriver.getClass().getSimpleName().equals("RemoteWebDriver"));
 	}
 	
-	//Open a page
+	//Opening a web page - Generic Web Pages (Non-local)
 	
 	/***
 	 * Open a webpage!
@@ -114,15 +141,170 @@ public abstract class NiceWebDriver {
 	}
 	
 	/***
-	 * Open a web page using the IP, Port, WebContextRoot, and any sub-root query
-	 * @param IP
+	 * Casts an URL Authority
+	 * @param protocol
+	 * @param userinfo
+	 * @param host
+	 * @param port
+	 * @return
+	 */
+	private String castToUrlAuthority(String protocol, String userinfo, String host, int port) {
+		String userTag = "";
+		if(userinfo != null && !userinfo.equals("")) {
+			userTag = userinfo+"@";
+		}
+		String portTag = "";
+		if(port >= 0) {
+			portTag = ":"+port;
+		}
+		return (protocol+"://"+userTag+host+portTag+"/");
+	}
+	
+	/***
+	 * Casts an Url string
+	 * @param protocol
+	 * @param userinfo
+	 * @param host
+	 * @param port
+	 * @param contextRoot
+	 * @param subrootQuery
+	 * @return
+	 */
+	private String castToUrl(String protocol, String userinfo, String host, int port, String contextRoot, String subrootQuery) {
+		if(contextRoot == null) {
+			return castToUrlAuthority(protocol,userinfo,host,port);
+		} else if(subrootQuery == null) {
+			return (castToUrlAuthority(protocol,userinfo,host,port)+contextRoot);
+		} else {
+			return (castToUrlAuthority(protocol,userinfo,host,port)+contextRoot+"/"+subrootQuery);
+		}
+	}
+	
+	/***
+	 * Open an url by specific protocol, user, host, port, context root and subroot
+	 * @param protocol
+	 * @param userinfo
+	 * @param host
 	 * @param port
 	 * @param contextRoot
 	 * @param subrootQuery
 	 */
-	private void openPageOnIPPortContextRoot(String IP, int port, String contextRoot, String subrootQuery) {
-		this.openWebPage("http://"+IP+":"+port+"/"+contextRoot+"/"+subrootQuery);
+	private void openPageOnHostPortContextRoot(String protocol, String userinfo, String host, int port, String contextRoot, String subrootQuery) {
+		this.openWebPage(castToUrl(protocol,userinfo,host,port,contextRoot,subrootQuery));
 	}
+	
+	/***
+	 * Open a web page using http, the host, context root, and any sub-root query
+	 * @param host
+	 * @param contextRoot
+	 * @param subrootQuery
+	 */
+	private void openHTTPOnHostContextRoot(String host, String contextRoot, String subrootQuery) {
+		this.openPageOnHostPortContextRoot(DomainConstants.UrlConstants.HTTP,null,host,-1,contextRoot,subrootQuery);
+	}
+	
+	/***
+	 * Open a web page using http, the host, context root, and any sub-root query
+	 * @param host
+	 * @param port
+	 * @param contextRoot
+	 * @param subrootQuery
+	 */
+	private void openHTTPOnHostPortContextRoot(String host, int port, String contextRoot, String subrootQuery) {
+		this.openPageOnHostPortContextRoot(DomainConstants.UrlConstants.HTTP,null,host,port,contextRoot,subrootQuery);
+	}
+	
+	/***
+	 * Open a web page using http, the host, context root, and any sub-root query
+	 * @param host
+	 * @param contextRoot
+	 * @param subrootQuery
+	 */
+	private void openHTTPSOnHostContextRoot(String host, String contextRoot, String subrootQuery) {
+		this.openPageOnHostPortContextRoot(DomainConstants.UrlConstants.HTTPS,null,host,-1,contextRoot,subrootQuery);
+	}
+	
+	/***
+	 * Open a web page using http, the host, context root, and any sub-root query
+	 * @param host
+	 * @param port
+	 * @param contextRoot
+	 * @param subrootQuery
+	 */
+	private void openHTTPSOnHostPortContextRoot(String host, int port, String contextRoot, String subrootQuery) {
+		this.openPageOnHostPortContextRoot(DomainConstants.UrlConstants.HTTPS,null,host,port,contextRoot,subrootQuery);
+	}
+	
+	//Opening a web page - Local Web Pages - Any local page
+	
+	/***
+	 * Will either initialise or return the initialised local IP
+	 * @return
+	 * @throws UnknownHostException
+	 */
+	public String getLocalIP() throws UnknownHostException {
+		if(this.localIP == null) {
+			this.localIP = InetAddress.getLocalHost().getHostAddress();
+		}
+		return this.localIP;
+	}
+	
+	/***
+	 * Open a web resource served from the local machine over HTTP on a default "environment port" with context and subroot query
+	 * @param contextRoot
+	 * @param subrootQuery
+	 * @throws UnknownHostException
+	 */
+	public void openLocalHTTPWebPageWithSubroot(String contextRoot, String subrootQuery) throws UnknownHostException {
+		this.openHTTPOnHostPortContextRoot(this.getLocalIP(),DomainConstants.localDefault.environPort,contextRoot,subrootQuery);
+	}
+	
+	/***
+	 * Open a web resource served from the local machine over HTTP on a default "environment port" with context
+	 * @param contextRoot
+	 * @throws UnknownHostException
+	 */
+	public void openLocalWebPageAtBase(String contextRoot) throws UnknownHostException {
+		this.openLocalHTTPWebPageWithSubroot(contextRoot,null);
+	}
+	
+	//Opening a web page - Local Web Pages - Default Local Page
+	
+	/***
+	 * Open a web resource served from the local machine over HTTP on a default "environment port" and a default "web context root" with a subroot query
+	 * @param subrootQuery
+	 * @throws UnknownHostException
+	 */
+	public void openLocalHTTPDefaultWebContextRootWithSubroot(String subrootQuery) throws UnknownHostException {
+		this.openLocalHTTPWebPageWithSubroot(DomainConstants.localDefault.webContextRoot,subrootQuery);
+	}
+	
+	/***
+	 * Open a web resource served from the local machine over HTTP on a default "environment port" and a default "web context root"
+	 * @throws UnknownHostException
+	 */
+	public void openLocalHTTPDefaultWebContextRootAtBase() throws UnknownHostException {
+		this.openLocalHTTPDefaultWebContextRootWithSubroot(null);
+	}
+	
+	//Opening a web page - Local Web Pages - Default Test Page
+	
+	/***
+	 * Opens a web resource defined by the "test default" parameters which specify an environ IP/Host, port, and WebContextRoot, with a subroot query
+	 * @param subrootQuery
+	 */
+	public void openTestDefaultWithSubroot(String subrootQuery) {
+		this.openHTTPOnHostPortContextRoot(DomainConstants.testDefault.environIP,DomainConstants.testDefault.environPort,DomainConstants.testDefault.webContextRoot,subrootQuery);
+	}
+	
+	/***
+	 * Opens a web resource defined by the "test default" parameters which specify an environ IP/Host, port, and WebContextRoot
+	 */
+	public void openTestDefaultAtBase() {
+		this.openTestDefaultWithSubroot(null);
+	}
+	
+	//Demarcation point for reformatting
 	
 	//Get Element
 	
@@ -249,42 +431,6 @@ public abstract class NiceWebDriver {
 			e.printStackTrace();
 			return false;
 		}
-	}
-	
-	/*
-	 * Open specified webContextRoot
-	 */
-	
-	public void openLocalWebPageWithSubroot(String webContextRoot, String subrootQuery) {
-		this.openPageOnIPPortContextRoot(this.localIP, DomainConstants.localDefault.environPort, webContextRoot,subrootQuery);
-	}
-	
-	public void openLocalWebPageAtBase(String webContextRoot) {
-		this.openLocalWebPageWithSubroot(webContextRoot,"");
-	}
-	
-	/*
-	 * Defaulted webContextRoot
-	 */
-	
-	public void openLocalDefaultWebContextRootWithSubroot(String subrootQuery) {
-		this.openLocalWebPageWithSubroot(DomainConstants.localDefault.webContextRoot,subrootQuery);
-	}
-	
-	public void openLocalDefaultWebContextRootAtBase() {
-		this.openLocalDefaultWebContextRootWithSubroot("");
-	}
-	
-	/*
-	 * Test generics
-	 */
-	
-	public void openTestDefaultWithSubroot(String subrootQuery) {
-		this.openPageOnIPPortContextRoot(DomainConstants.testDefault.environIP, DomainConstants.testDefault.environPort, DomainConstants.testDefault.webContextRoot, subrootQuery);
-	}
-	
-	public void openTestDefaultAtBase() {
-		this.openTestDefaultWithSubroot("");
 	}
 	
 	public boolean isWebPage404() {
