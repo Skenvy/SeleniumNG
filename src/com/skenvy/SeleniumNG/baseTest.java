@@ -21,9 +21,10 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 
+import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
+import com.skenvy.SeleniumNG.NiceWebDriver.NiceChrome;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriver;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriverFactory;
-import com.skenvy.SeleniumNG.NiceWebDriver.NiceDrivers.NiceChrome;
 
 public class baseTest {
 	
@@ -110,14 +111,9 @@ public class baseTest {
 		while(attempts < DomainConstants.testDefault.defaultChromeInstantiationMaxRetry) {
 			try {
 				if(remoteConfig == null) {
-					//TODO
-					//chrome = new NiceChrome(DomainConstants.testDefault.defaultWaitSeconds,"");
-					chrome = NiceWebDriverFactory.getFactory().getNiceWebDriver(NiceWebDriverFactory.DriverExtension.Chrome);
+					chrome = NiceWebDriverFactory.getFactory().getNiceWebDriver(DriverType.Chrome,"--incognito --start-maximized",DomainConstants.testDefault.defaultWaitSeconds);
 				} else {
-					RemoteWebDriver rwd = new RemoteWebDriver(new URL(remoteConfig.nodeUrl), remoteConfig.capabilities);
-					//TODO
-					//chrome = new NiceChrome(DomainConstants.testDefault.defaultWaitSeconds,rwd);
-					chrome = NiceWebDriverFactory.getFactory().getNiceWebDriver(NiceWebDriverFactory.DriverExtension.Chrome);
+					chrome = NiceWebDriverFactory.getFactory().getNiceWebDriverRemote(DriverType.Chrome, new URL(remoteConfig.nodeUrl),DomainConstants.testDefault.defaultWaitSeconds);
 				}
 				break;
 			} catch (UnknownHostException e) {

@@ -4,22 +4,24 @@ import java.util.HashMap;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriverFactory.DriverExtension;
+import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
 
 public class DomainConstants {
 	
 	/***
 	 * Maps a DriverExtension enum value K to the path Domain Constant required for the System.setProperty(...,K)
 	 */
-	public static final HashMap<DriverExtension,String> defaultWebDriverSystemPaths = new HashMap<DriverExtension,String>(){{
-		put(DriverExtension.Chrome,"C:\\Users\\i-am-\\Documents\\06. PROGRAMS\\Programming\\Selenium\\chromedriver.exe");
-		put(DriverExtension.Firefox,"");
-		put(DriverExtension.IE,"");
-		put(DriverExtension.Edge,"");
-		put(DriverExtension.Opera,"");
-		put(DriverExtension.Safari,"");
-		put(DriverExtension.iOS,"");
-		put(DriverExtension.Android,"");
+	public static final HashMap<DriverType,String> defaultWebDriverSystemPaths = new HashMap<DriverType,String>(){{
+		put(DriverType.Chrome,"C:\\Users\\i-am-\\Documents\\06. PROGRAMS\\Programming\\Selenium\\chromedriver.exe");
+		put(DriverType.Firefox,"");
+		put(DriverType.IE,"");
+		put(DriverType.Edge,"");
+		put(DriverType.Opera,"");
+		put(DriverType.Safari,"");
+		put(DriverType.iOS_iPhone,"");
+		put(DriverType.iOS_iPad,"");
+		put(DriverType.Android,"");
+		put(DriverType.HtmlUnit,"");
 	}};
 	
 	public class localDefault {

@@ -1,6 +1,7 @@
 package com.skenvy.SeleniumNG.NiceWebDriver;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchElementException;
@@ -20,6 +21,7 @@ import com.skenvy.SeleniumNG.DomainConstants.testDefault;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 
 public abstract class NiceWebDriver {
@@ -47,11 +49,40 @@ public abstract class NiceWebDriver {
 	// Constructors
 	
 	/***
+	 * Constructor which takes a boolean to differentiate the two "parameterless" constructors, one
+	 * for a local instance, and one for a remote instance
+	 * @param localInstance
+	 */
+	protected NiceWebDriver(boolean localInstance){
+		if(localInstance) {
+			this.webDriver = getDriver();
+		} else {
+			this.webDriver = new RemoteWebDriver(getRemoteCapability());
+		}
+		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
+		this.jsExecutor = (JavascriptExecutor)this.webDriver;
+	}
+	
+	/***
+	 * Constructor which takes a boolean to differentiate the two "parameterless" constructors, one
+	 * for a local instance, and one for a remote instance
+	 * @param localInstance
+	 */
+	protected NiceWebDriver(boolean localInstance, int waitSeconds){
+		if(localInstance) {
+			this.webDriver = getDriver();
+		} else {
+			this.webDriver = new RemoteWebDriver(getRemoteCapability());
+		}
+		this.wait = new WebDriverWait(this.webDriver,waitSeconds);
+		this.jsExecutor = (JavascriptExecutor)this.webDriver;
+	}
+	
+	/***
 	 * Constructor which only takes the option arguments to be handed to the "Browser"-Options
 	 * @param optionArgs
-	 * @throws UnknownHostException
 	 */
-	public NiceWebDriver(String optionArgs){
+	protected NiceWebDriver(String optionArgs){
 		MutableCapabilities mutableCapabilities = makeBrowserOptions(optionArgs);
 		this.webDriver = getDriver(mutableCapabilities);
 		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
@@ -59,12 +90,11 @@ public abstract class NiceWebDriver {
 	}
 	
 	/***
-	 * Constructor which only takes an instance of the RemoteWebDriver
-	 * @param remoteWebDriver
-	 * @throws UnknownHostException
+	 * Constructor which only takes an URL to make a remote webdriver
+	 * @param remoteAddress
 	 */
-	public NiceWebDriver(RemoteWebDriver remoteWebDriver){
-		this.webDriver = remoteWebDriver;
+	protected NiceWebDriver(URL remoteAddress){
+		this.webDriver = new RemoteWebDriver(remoteAddress,getRemoteCapability());
 		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 	}
@@ -72,11 +102,10 @@ public abstract class NiceWebDriver {
 	/***
 	 * Constructor which takes the option arguments to be handed to the "Browser"-Options,
 	 * as well as a defined wait time in seconds
-	 * @param waitSeconds
 	 * @param optionArgs
-	 * @throws UnknownHostException
+	 * @param waitSeconds
 	 */
-	public NiceWebDriver(String optionArgs, int waitSeconds){
+	protected NiceWebDriver(String optionArgs, int waitSeconds){
 		MutableCapabilities mutableCapabilities = makeBrowserOptions(optionArgs);
 		this.webDriver = getDriver(mutableCapabilities);
 		this.wait = new WebDriverWait(this.webDriver,waitSeconds);
@@ -84,14 +113,13 @@ public abstract class NiceWebDriver {
 	}
 	
 	/***
-	 * Constructor which only takes an instance of the RemoteWebDriver,
+	 * Constructor which only takes an URL to make a remote webdriver,
 	 * as well as a defined wait time in seconds
+	 * @param remoteAddress
 	 * @param waitSeconds
-	 * @param rwd
-	 * @throws UnknownHostException
 	 */
-	public NiceWebDriver(RemoteWebDriver remoteWebDriver, int waitSeconds){
-		this.webDriver = remoteWebDriver;
+	protected NiceWebDriver(URL remoteAddress, int waitSeconds){
+		this.webDriver = new RemoteWebDriver(remoteAddress,getRemoteCapability());
 		this.wait = new WebDriverWait(this.webDriver,waitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 	}
@@ -107,11 +135,25 @@ public abstract class NiceWebDriver {
 	protected abstract MutableCapabilities makeBrowserOptions(String optionArgs);
 	
 	/***
-	 * Returns a webdriver appropriate to the subclass of this NiceWebDriver
+	 * Returns a local webdriver appropriate to the subclass of this NiceWebDriver
 	 * @param mutableCapabilities
 	 * @return
 	 */
 	protected abstract WebDriver getDriver(MutableCapabilities mutableCapabilities);
+	
+	/***
+	 * Returns a local webdriver appropriate to the subclass of this NiceWebDriver
+	 * @param mutableCapabilities
+	 * @return
+	 */
+	protected abstract WebDriver getDriver();
+	
+	/***
+	 * Returns the capability request for a remote webdriver appropriate to the subclass of this NiceWebDriver
+	 * @param mutableCapabilities
+	 * @return
+	 */
+	protected abstract Capabilities getRemoteCapability();
 	
 	//Niceties
 	
