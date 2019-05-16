@@ -49,6 +49,15 @@ public abstract class NiceWebDriver {
 	// Constructors
 	
 	/***
+	 * An argumentless instance for the purposes of calling the UnderloadedNiceChromeDriverConstructor
+	 */
+	protected NiceWebDriver() {
+		this.webDriver = null;
+		this.wait = null;
+		this.jsExecutor = null;
+	}
+	
+	/***
 	 * Constructor which takes a boolean to differentiate the two "parameterless" constructors, one
 	 * for a local instance, and one for a remote instance
 	 * @param localInstance
@@ -154,6 +163,60 @@ public abstract class NiceWebDriver {
 	 * @return
 	 */
 	protected abstract Capabilities getRemoteCapability();
+	
+	//Abstract wrappers on the constructors, to return the return of the constructors
+	
+	protected abstract NiceWebDriver InvokeContsructorWithArguments(boolean localInstance);
+	
+	protected abstract NiceWebDriver InvokeContsructorWithArguments(boolean localInstance, int waitSeconds);
+	
+	protected abstract NiceWebDriver InvokeContsructorWithArguments(String optionArgs);
+	
+	protected abstract NiceWebDriver InvokeContsructorWithArguments(String optionArgs, int waitSeconds);
+	
+	protected abstract NiceWebDriver InvokeContsructorWithArguments(URL remoteAddress);
+	
+	protected abstract NiceWebDriver InvokeContsructorWithArguments(URL remoteAddress, int waitSeconds);
+	
+	//Underloaded Constructor to decouple the switches in the factory
+	
+	/***
+	 * Takes an object array and parses them into suitable arrangements for the different constructors
+	 * @param oArgs
+	 * @return
+	 */
+	protected NiceWebDriver UnderloadedNiceChromeDriverConstructor(Object[] oArgs) {
+		//Wrap the top length at 2 and 1
+		if(oArgs.length < 3 && oArgs.length > 0){
+			//The first argument can be of three types
+			if(oArgs[0].getClass().getName().equals("java.lang.Boolean")) {
+				if(oArgs.length == 2) {
+					if(oArgs[1].getClass().getName().equals("java.lang.Integer")) {
+						return InvokeContsructorWithArguments((boolean) oArgs[0], (int) oArgs[0]);
+					}
+				} else {
+					return InvokeContsructorWithArguments((boolean) oArgs[0]);
+				}
+			} else if(oArgs[0].getClass().getName().equals("java.lang.String")) {
+				if(oArgs.length == 2) {
+					if(oArgs[1].getClass().getName().equals("java.lang.Integer")) {
+						return InvokeContsructorWithArguments((String) oArgs[0], (int) oArgs[0]);
+					}
+				} else {
+					return InvokeContsructorWithArguments((String) oArgs[0]);
+				}
+			} else if(oArgs[0].getClass().getName().equals("java.net.URL")) {
+				if(oArgs.length == 2) {
+					if(oArgs[1].getClass().getName().equals("java.lang.Integer")) {
+						return InvokeContsructorWithArguments((URL) oArgs[0], (int) oArgs[0]);
+					}
+				} else {
+					return InvokeContsructorWithArguments((URL) oArgs[0]);
+				}
+			}
+		}
+		return null;
+	}
 	
 	//Niceties
 	

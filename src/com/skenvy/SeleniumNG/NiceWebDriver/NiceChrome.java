@@ -15,6 +15,10 @@ public class NiceChrome extends NiceWebDriver {
 
 	//Super every constructor
 	
+	protected NiceChrome() {
+		super();
+	}
+	
 	protected NiceChrome(boolean localInstance) {
 		super(localInstance);
 	}
@@ -37,6 +41,38 @@ public class NiceChrome extends NiceWebDriver {
 	
 	protected NiceChrome(URL remoteAddress, int waitSeconds) {
 		super(remoteAddress, waitSeconds);
+	}
+	
+	//Overrides - InvokeContsructorWithArguments
+	
+	@Override
+	protected NiceWebDriver InvokeContsructorWithArguments(boolean localInstance) {
+		return new NiceChrome(localInstance);
+	}
+
+	@Override
+	protected NiceWebDriver InvokeContsructorWithArguments(boolean localInstance, int waitSeconds) {
+		return new NiceChrome(localInstance,waitSeconds);
+	}
+
+	@Override
+	protected NiceWebDriver InvokeContsructorWithArguments(String optionArgs) {
+		return new NiceChrome(optionArgs);
+	}
+
+	@Override
+	protected NiceWebDriver InvokeContsructorWithArguments(String optionArgs, int waitSeconds) {
+		return new NiceChrome(optionArgs,waitSeconds);
+	}
+
+	@Override
+	protected NiceWebDriver InvokeContsructorWithArguments(URL remoteAddress) {
+		return new NiceChrome(remoteAddress);
+	}
+
+	@Override
+	protected NiceWebDriver InvokeContsructorWithArguments(URL remoteAddress, int waitSeconds) {
+		return new NiceChrome(remoteAddress,waitSeconds);
 	}
 
 	//Overrides - Chrome
