@@ -1,6 +1,7 @@
 package com.skenvy.SeleniumNG;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,12 +27,17 @@ import com.skenvy.SeleniumNG.NiceWebDriver.NiceChrome;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriver;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriverFactory;
 
-public class baseTest {
+public abstract class baseTest {
 	
 	protected NiceWebDriver chrome;
-	RemoteConfig remoteConfig = null;
+	private RemoteConfig remoteConfig = null;
 	private boolean testInDevelopment = false;
 	private boolean testIsBeingDemonstrated = false;
+	private final NiceWebDriverFactory nwdf;
+	
+	baseTest(String configFilePath) throws IOException{
+		nwdf = NiceWebDriverFactory.getFactory(configFilePath);
+	}
 	
 	private class RemoteConfig{
 		
@@ -66,32 +72,34 @@ public class baseTest {
 		for(String nodeUrl : DomainConstants.seleniumNodes.keySet()) {
 			if(DomainConstants.seleniumNodes.get(nodeUrl) == null) {
 				// If the node maps to a null DesiredCapabilites then it must be a local instance
-				result[incr] = this.newLocal();
+				result[incr] = this.newLocal(getPathToDomainConstantsConfig());
 			} else {
 				// Otherwise we can procure a new remote instance using the de
-				result[incr] = this.newRemote(nodeUrl,DomainConstants.seleniumNodes.get(nodeUrl));
+				result[incr] = this.newRemote(getPathToDomainConstantsConfig(),nodeUrl,DomainConstants.seleniumNodes.get(nodeUrl));
 			}
 			incr++;
 		}
         return result;
     }
 	
-	public baseTest newSubClassInstance() throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	public abstract String getPathToDomainConstantsConfig();
+	
+	public baseTest newSubClassInstance(String configFilePath) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// Get the Class object, cast to an extension of this class, from the class name of the object calling this method
 		Class<? extends baseTest> thisClass = (Class<? extends baseTest>) Class.forName(this.getClass().getName());
 		// Create a new instance of the sub class from its parameterless constructor, typed to this baseTest class
-		baseTest newObj = thisClass.getConstructor().newInstance();
+		baseTest newObj = thisClass.getConstructor(new Class[] { String.class }).newInstance(configFilePath);
 		return newObj;
 	}
 	
-	public baseTest newLocal() throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		baseTest newObj = this.newSubClassInstance();
+	public baseTest newLocal(String configFilePath) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		baseTest newObj = this.newSubClassInstance(configFilePath);
 		newObj.remoteConfig = null;
 		return newObj;
 	}
 	
-	public baseTest newRemote(String nodeUrl, DesiredCapabilities capabilities) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		baseTest newObj = this.newSubClassInstance();
+	public baseTest newRemote(String configFilePath, String nodeUrl, DesiredCapabilities capabilities) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		baseTest newObj = this.newSubClassInstance(configFilePath);
 		newObj.remoteConfig = new RemoteConfig();
 		newObj.remoteConfig.nodeUrl = nodeUrl;
 		newObj.remoteConfig.capabilities = capabilities;
@@ -105,25 +113,11 @@ public class baseTest {
 	//public abstract void beforeMethod();
   
 	@BeforeClass
-	public void beforeClass() throws UnknownHostException, MalformedURLException, FileNotFoundException {
-		int attempts = 0;
-		UnknownHostException uhe = null;
-		while(attempts < DomainConstants.testDefault.defaultChromeInstantiationMaxRetry) {
-			try {
-				if(remoteConfig == null) {
-					chrome = NiceWebDriverFactory.getFactory().getNiceWebDriver(DriverType.Chrome,"--incognito --start-maximized",DomainConstants.testDefault.defaultWaitSeconds);
-				} else {
-					chrome = NiceWebDriverFactory.getFactory().getNiceWebDriverRemote(DriverType.Chrome, new URL(remoteConfig.nodeUrl),DomainConstants.testDefault.defaultWaitSeconds);
-				}
-				break;
-			} catch (UnknownHostException e) {
-				attempts++;
-				uhe = e;
-				e.printStackTrace();
-			}
-		}
-		if(uhe != null && attempts == DomainConstants.testDefault.defaultChromeInstantiationMaxRetry) {
-			throw uhe;
+	public void beforeClass() throws MalformedURLException, FileNotFoundException {
+		if(remoteConfig == null) {
+			chrome = nwdf.getNiceWebDriver(DriverType.Chrome,"--incognito --start-maximized",DomainConstants.testDefault.defaultWaitSeconds);
+		} else {
+			chrome = nwdf.getNiceWebDriverRemote(DriverType.Chrome, new URL(remoteConfig.nodeUrl),DomainConstants.testDefault.defaultWaitSeconds);
 		}
 	}
 

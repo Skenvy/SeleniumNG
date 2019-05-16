@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>-- Properties File Comments --</comment>
+<entry key="webDriverSystemPaths.Chrome">C:\Users\i-am-\Documents\06. PROGRAMS\Programming\Selenium\chromedriver_74.exe</entry>
+<entry key="webDriverSystemPaths.Firefox"></entry>
+<entry key="webDriverSystemPaths.IE"></entry>
+<entry key="webDriverSystemPaths.Edge"></entry>
+<entry key="webDriverSystemPaths.Opera"></entry>
+<entry key="webDriverSystemPaths.Safari"></entry>
+<entry key="webDriverSystemPaths.iOS_iPhone"></entry>
+<entry key="webDriverSystemPaths.iOS_iPad"></entry>
+<entry key="webDriverSystemPaths.Android"></entry>
+<entry key="webDriverSystemPaths.HtmlUnit"></entry>
+</properties>

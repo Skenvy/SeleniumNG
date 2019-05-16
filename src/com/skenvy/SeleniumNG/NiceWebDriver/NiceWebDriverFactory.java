@@ -2,28 +2,27 @@ package com.skenvy.SeleniumNG.NiceWebDriver;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.InetAddress;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.BrowserType;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import com.skenvy.SeleniumNG.DomainConstants;
 
 
 public class NiceWebDriverFactory {
 	
-	//Singleton definition
+	///////////////////////////////////////////////////////////////////////////
+	//                         Singleton definition                          //
+	///////////////////////////////////////////////////////////////////////////
 	
 	/***
-	 * Keeps track of the list of drivers that have already been set, through creation by this factory
+	 * Keeps track of the list of drivers that have already 
+	 * been set, through creation by this factory
 	 */
 	private static ArrayList<DriverType> driversSet;
 	
@@ -34,65 +33,142 @@ public class NiceWebDriverFactory {
 	
 	/***
 	 * Instantiate the NiceWebDriverFactory singleton
+	 * @throws IOException 
 	 */
-	private NiceWebDriverFactory(){
+	private NiceWebDriverFactory(String configFilePath) throws IOException{
 		driversSet = new ArrayList<DriverType>();
+		domainConstants = new DomainConstants(configFilePath);
 	}
 	
 	/***
 	 * Get the singleton factory NiceWebDriverFactory.
-	 * @return
+	 * @return NiceWebDriverFactory
+	 * @throws IOException 
 	 */
-	public static NiceWebDriverFactory getFactory() {
+	public static NiceWebDriverFactory getFactory(String configFilePath) throws IOException {
 		if(instance == null) {
-			instance = new NiceWebDriverFactory();
+			instance = new NiceWebDriverFactory(configFilePath);
 		}
 		return instance;
 	}
 	
-	public static void main(String[] args) throws MalformedURLException {
+	//TODO : Remove before release
+	public static void main(String[] args){
 		System.out.println("哇");
 	}
 	
-	//Singleton body is defined, now define the factory methods
+	///////////////////////////////////////////////////////////////////////////
+	//                     Must include domain constants                     //
+	///////////////////////////////////////////////////////////////////////////
 	
-	//Define the factory methods | Get Local
+	private static DomainConstants domainConstants;
 	
-	public NiceWebDriver getNiceWebDriver(DriverType driverType) throws UnknownHostException, FileNotFoundException {
+	///////////////////////////////////////////////////////////////////////////
+	//                Define the factory methods | Get Local                 //
+	///////////////////////////////////////////////////////////////////////////
+	
+	/***
+	 * Returns an instance of the NiceWebDriver of a specific DriverType
+	 * @param driverType
+	 * @return NiceWebDriver
+	 * @throws FileNotFoundException
+	 */
+	public NiceWebDriver getNiceWebDriver(DriverType driverType) throws FileNotFoundException {
 		return getNiceWebDriver(driverType,"");
 	}
 	
-	public NiceWebDriver getNiceWebDriver(DriverType driverType, String optionArgs) throws UnknownHostException, FileNotFoundException {
+	/***
+	 * Returns an instance of the NiceWebDriver of a specific DriverType, with
+	 * browser options specified by a string of option arguments
+	 * @param driverType
+	 * @param optionArgs
+	 * @return NiceWebDriver
+	 * @throws FileNotFoundException
+	 */
+	public NiceWebDriver getNiceWebDriver(DriverType driverType, String optionArgs) throws FileNotFoundException {
 		return getNiceWebDriver(driverType,optionArgs,-1);
 	}
 	
-	public NiceWebDriver getNiceWebDriver(DriverType driverType, String optionArgs, int waitSeconds) throws UnknownHostException, FileNotFoundException {
+	/***
+	 * Returns an instance of the NiceWebDriver of a specific DriverType, with
+	 * browser options specified by a string of option arguments, and a non
+	 * default number of seconds to wait for the presence of web elements.
+	 * @param driverType
+	 * @param optionArgs
+	 * @param waitSeconds
+	 * @return NiceWebDriver
+	 * @throws FileNotFoundException
+	 */
+	public NiceWebDriver getNiceWebDriver(DriverType driverType, String optionArgs, int waitSeconds) throws FileNotFoundException {
 		setSystemPropertyWebDriver(driverType);
 		return getNiceWebDriverInstanceForDriver(driverType,optionArgs,waitSeconds);
 	}
 	
-	//Define the factory methods | Get Remote
+	///////////////////////////////////////////////////////////////////////////
+	//                Define the factory methods | Get Remote                //
+	///////////////////////////////////////////////////////////////////////////
 	
-	public NiceWebDriver getNiceWebDriverRemote(DriverType driverType) throws UnknownHostException, FileNotFoundException {
+	/***
+	 * Returns a remote instance of the NiceWebDriver of a specific DriverType
+	 * @param driverType
+	 * @return NiceWebDriver
+	 * @throws FileNotFoundException
+	 */
+	public NiceWebDriver getNiceWebDriverRemote(DriverType driverType) throws FileNotFoundException {
 		return getNiceWebDriverRemote(driverType,null);
 	}
-	
-	public NiceWebDriver getNiceWebDriverRemote(DriverType driverType, URL remoteAddress) throws UnknownHostException, FileNotFoundException {
+
+	/***
+	 * Returns a remote instance of the NiceWebDriver of a specific DriverType,
+	 * with a remote address specified by an URL
+	 * @param driverType
+	 * @param remoteAddress
+	 * @return NiceWebDriver
+	 * @throws FileNotFoundException
+	 */
+	public NiceWebDriver getNiceWebDriverRemote(DriverType driverType, URL remoteAddress) throws FileNotFoundException {
 		return getNiceWebDriverRemote(driverType,remoteAddress,-1);
 	}
-	
-	public NiceWebDriver getNiceWebDriverRemote(DriverType driverType, URL remoteAddress, int waitSeconds) throws UnknownHostException, FileNotFoundException {
+
+	/***
+	 * Returns a remote instance of the NiceWebDriver of a specific DriverType,
+	 * with a remote address specified by an URL, and a non default number of 
+	 * seconds to wait for the presence of web elements.
+	 * @param driverType
+	 * @param remoteAddress
+	 * @param waitSeconds
+	 * @return NiceWebDriver
+	 * @throws FileNotFoundException
+	 */
+	public NiceWebDriver getNiceWebDriverRemote(DriverType driverType, URL remoteAddress, int waitSeconds) throws FileNotFoundException {
 		setSystemPropertyWebDriver(driverType);
 		return getNiceWebDriverInstanceForRemote(driverType,remoteAddress,waitSeconds);
 	}
 	
-	//Define the factory methods | Internal Switch Cases | Local
-	
-	private NiceWebDriver getNiceWebDriverInstanceForDriver(DriverType driverType, String optionArgs, int waitSeconds) throws UnknownHostException {
+	///////////////////////////////////////////////////////////////////////////
+	//      Define the factory methods | Internal Switch Cases | Local       //
+	///////////////////////////////////////////////////////////////////////////
+
+	/***
+	 * Returns a local NiceWebDriver appropriate for the driver type, browser
+	 * option arguments, and time to wait for the presence of web elements.
+	 * @param driverType
+	 * @param optionArgs
+	 * @param waitSeconds
+	 * @return NiceWebDriver
+	 */
+	private NiceWebDriver getNiceWebDriverInstanceForDriver(DriverType driverType, String optionArgs, int waitSeconds) {
 		Object[] oArgs = getUnderloadedConstructorArrayForDriver(optionArgs,waitSeconds);
 		return getNiceWebDriverInstance(driverType,oArgs);
 	}
-	
+
+	/***
+	 * Returns the Object[] appropriate for creating a local NiceWebDriver on
+	 * calling the UnderloadedNiceChromeDriverConstructor(Object[])
+	 * @param optionArgs
+	 * @param waitSeconds
+	 * @return Object[]
+	 */
 	private Object[] getUnderloadedConstructorArrayForDriver(String optionArgs, int waitSeconds) {
 		Object[] oArgs = new Object[] {optionArgs,waitSeconds};
 		if(optionArgs == null || optionArgs.equals("")) {
@@ -104,13 +180,30 @@ public class NiceWebDriverFactory {
 		return oArgs;
 	}
 	
-	//Define the factory methods | Internal Switch Cases | Remote
-	
-	private NiceWebDriver getNiceWebDriverInstanceForRemote(DriverType driverType, URL remoteAddress, int waitSeconds) throws UnknownHostException {
+	///////////////////////////////////////////////////////////////////////////
+	//      Define the factory methods | Internal Switch Cases | Remote      //
+	///////////////////////////////////////////////////////////////////////////
+
+	/***
+	 * Returns a remote NiceWebDriver appropriate for the driver type, remote
+	 * URL, and time to wait for the presence of web elements.
+	 * @param driverType
+	 * @param remoteAddress
+	 * @param waitSeconds
+	 * @return NiceWebDriver
+	 */
+	private NiceWebDriver getNiceWebDriverInstanceForRemote(DriverType driverType, URL remoteAddress, int waitSeconds) {
 		Object[] oArgs = getUnderloadedConstructorArrayForRemote(remoteAddress,waitSeconds);
 		return getNiceWebDriverInstance(driverType,oArgs);
 	}
-	
+
+	/***
+	 * Returns the Object[] appropriate for creating a remote NiceWebDriver on
+	 * calling the UnderloadedNiceChromeDriverConstructor(Object[])
+	 * @param remoteAddress
+	 * @param waitSeconds
+	 * @return Object[]
+	 */
 	private Object[] getUnderloadedConstructorArrayForRemote(URL remoteAddress, int waitSeconds) {
 		Object[] oArgs = new Object[] {remoteAddress,waitSeconds};
 		if(remoteAddress == null) {
@@ -122,9 +215,18 @@ public class NiceWebDriverFactory {
 		return oArgs;
 	}
 	
-	//Define the factory methods | Internal Switch Cases | Both
-	
-	private NiceWebDriver getNiceWebDriverInstance(DriverType driverType, Object[] oArgs) throws UnknownHostException {
+	///////////////////////////////////////////////////////////////////////////
+	//       Define the factory methods | Internal Switch Cases | Both       //
+	///////////////////////////////////////////////////////////////////////////
+
+	/***
+	 * Handles the switch case of handing the Object[] to the method
+	 * UnderloadedNiceChromeDriverConstructor, switching on the driver type
+	 * @param driverType
+	 * @param oArgs
+	 * @return NiceWebDriver
+	 */
+	private NiceWebDriver getNiceWebDriverInstance(DriverType driverType, Object[] oArgs){
 		switch(driverType) {
 			case Chrome:
 				return new NiceChrome().UnderloadedNiceChromeDriverConstructor(oArgs);
@@ -152,7 +254,8 @@ public class NiceWebDriverFactory {
 	}
 	
 	/***
-	 * Maps a DriverType enum value K to the DesiredCapabilities required to make a RemoteWebDriver
+	 * Maps a DriverType enum value K to the DesiredCapabilities required to
+	 * make a RemoteWebDriver
 	 * TODO - Deprecate and move into getRemoteCapability() overrides
 	 */
 	private static final HashMap<DriverType,Capabilities> webDriverCapabilites = new HashMap<DriverType,Capabilities>(){{
@@ -168,7 +271,9 @@ public class NiceWebDriverFactory {
 		put(DriverType.HtmlUnit,DesiredCapabilities.htmlUnit());
 	}};
 	
-	//Factory methods are defined, now define the System Path setting encapsulation
+	///////////////////////////////////////////////////////////////////////////
+	//             Define the System Path setting encapsulation              //
+	///////////////////////////////////////////////////////////////////////////
 	
 	/***
 	 * If the driver system property is known, and the driver file can be 
@@ -178,7 +283,7 @@ public class NiceWebDriverFactory {
 	 * @throws FileNotFoundException
 	 */
 	private void setSystemPropertyWebDriver(DriverType driverType) throws FileNotFoundException {
-		String driverPath = DomainConstants.defaultWebDriverSystemPaths.get(driverType);
+		String driverPath = domainConstants.webDriverSystemPaths.get(driverType);
 		setSystemPropertyWebDriver(driverType, driverPath);
 	}
 	
@@ -206,8 +311,10 @@ public class NiceWebDriverFactory {
 	}
 	
 	/***
-	 * Maps a DriverType enum value K to the string required for the System.setProperty(K,...)
+	 * Maps a DriverType enum value K to the string 
+	 * required for the System.setProperty(K,...)
 	 */
+	@SuppressWarnings("serial")
 	private static final HashMap<DriverType,String> webDriverSystemProperties = new HashMap<DriverType,String>(){{
 		put(DriverType.Chrome,"webdriver.chrome.driver");
 		put(DriverType.Firefox,"webdriver.gecko.driver");

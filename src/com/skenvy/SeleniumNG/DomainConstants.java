@@ -1,6 +1,11 @@
 package com.skenvy.SeleniumNG;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.InvalidPropertiesFormatException;
+import java.util.Properties;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -8,21 +13,34 @@ import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
 
 public class DomainConstants {
 	
+	private final Properties properties = new Properties();
+	
+	public DomainConstants(String configFilePath) throws IOException{
+		//Read in the properties then close the file
+		FileInputStream in = new FileInputStream(configFilePath);
+		properties.loadFromXML(in);
+		in.close();
+		//Assign the properties to the hashtables
+		webDriverSystemPaths = new HashMap<DriverType,String>(){{
+			put(DriverType.Chrome,properties.getProperty("webDriverSystemPaths.Chrome"));
+			put(DriverType.Firefox,properties.getProperty("defaultWebDriverSystemPaths.Firefox"));
+			put(DriverType.IE,properties.getProperty("defaultWebDriverSystemPaths.IE"));
+			put(DriverType.Edge,properties.getProperty("defaultWebDriverSystemPaths.Edge"));
+			put(DriverType.Opera,properties.getProperty("defaultWebDriverSystemPaths.Opera"));
+			put(DriverType.Safari,properties.getProperty("defaultWebDriverSystemPaths.Safari"));
+			put(DriverType.iOS_iPhone,properties.getProperty("defaultWebDriverSystemPaths.iOS_iPhone"));
+			put(DriverType.iOS_iPad,properties.getProperty("defaultWebDriverSystemPaths.iOS_iPad"));
+			put(DriverType.Android,properties.getProperty("defaultWebDriverSystemPaths.Android"));
+			put(DriverType.HtmlUnit,properties.getProperty("defaultWebDriverSystemPaths.HtmlUnit"));
+		}};
+	}
+	
 	/***
 	 * Maps a DriverExtension enum value K to the path Domain Constant required for the System.setProperty(...,K)
 	 */
-	public static final HashMap<DriverType,String> defaultWebDriverSystemPaths = new HashMap<DriverType,String>(){{
-		put(DriverType.Chrome,"C:\\Users\\i-am-\\Documents\\06. PROGRAMS\\Programming\\Selenium\\chromedriver.exe");
-		put(DriverType.Firefox,"");
-		put(DriverType.IE,"");
-		put(DriverType.Edge,"");
-		put(DriverType.Opera,"");
-		put(DriverType.Safari,"");
-		put(DriverType.iOS_iPhone,"");
-		put(DriverType.iOS_iPad,"");
-		put(DriverType.Android,"");
-		put(DriverType.HtmlUnit,"");
-	}};
+	public final HashMap<DriverType,String> webDriverSystemPaths;
+	
+	//Demarcation - Above is dynamic, below is static
 	
 	public class localDefault {
 		public final static int environPort = 8080;
