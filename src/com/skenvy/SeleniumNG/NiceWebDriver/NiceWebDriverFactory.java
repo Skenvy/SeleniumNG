@@ -47,6 +47,15 @@ public class NiceWebDriverFactory {
 	}
 	
 	/***
+	 * Instantiate the NiceWebDriverFactory singleton
+	 * @throws IOException 
+	 */
+	private NiceWebDriverFactory(DomainConstants domainConstants) throws IOException{
+		driversSet = new ArrayList<DriverType>();
+		this.domainConstants = domainConstants;
+	}
+	
+	/***
 	 * Get the singleton factory NiceWebDriverFactory, requiring the path to
 	 * the configuration file.
 	 * @return NiceWebDriverFactory
@@ -60,13 +69,25 @@ public class NiceWebDriverFactory {
 	}
 	
 	/***
+	 * Get the singleton factory NiceWebDriverFactory, requiring the domainConstants
+	 * @return NiceWebDriverFactory
+	 * @throws IOException 
+	 */
+	public static NiceWebDriverFactory getFactory(DomainConstants domainConstants) throws IOException {
+		if(instance == null) {
+			instance = new NiceWebDriverFactory(domainConstants);
+		}
+		return instance;
+	}
+	
+	/***
 	 * Get the singleton factory NiceWebDriverFactory.
 	 * @return NiceWebDriverFactory
 	 * @throws FileNotFoundException 
 	 */
 	public static NiceWebDriverFactory getFactory() throws FileNotFoundException {
 		if(instance == null) {
-			throw new FileNotFoundException("Before you can call the parameterless getFactory, you must call it once with path to the configuration file.");
+			throw new FileNotFoundException("Before you can call the parameterless getFactory, you must call it once with path to the configuration file, or a reference to a staticly fielded DomainConstants");
 		}
 		return instance;
 	}
@@ -80,7 +101,11 @@ public class NiceWebDriverFactory {
 	//                     Must include domain constants                     //
 	///////////////////////////////////////////////////////////////////////////
 	
-	private static DomainConstants domainConstants;
+	private DomainConstants domainConstants;
+	
+	public DomainConstants getDomainConstants() {
+		return this.domainConstants;
+	}
 	
 	///////////////////////////////////////////////////////////////////////////
 	//                Define the factory methods | Get Local                 //

@@ -2,6 +2,7 @@
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
 <comment>-- Properties File Comments --</comment>
+<!-- WebDriverSystemPaths -->
 <entry key="WebDriverSystemPaths.Chrome">C:\Users\i-am-\Documents\06. PROGRAMS\Programming\Selenium\chromedriver_74.exe</entry>
 <entry key="WebDriverSystemPaths.Firefox"></entry>
 <entry key="WebDriverSystemPaths.IE"></entry>
@@ -12,4 +13,21 @@
 <entry key="WebDriverSystemPaths.iOS_iPad"></entry>
 <entry key="WebDriverSystemPaths.Android"></entry>
 <entry key="WebDriverSystemPaths.HtmlUnit"></entry>
+<!-- Local -->
+<entry key="Local.EnvironPort">8080</entry>
+<entry key="Local.WebContextRoot"></entry>
+<entry key="Local.WaitSeconds">1</entry>
+<entry key="Local.InstantiationMaxRetry">5</entry>
+<!-- Test -->
+<entry key="Test.EnvironIP">localhost</entry>
+<entry key="Test.EnvironPort">8080</entry>
+<entry key="Test.WebContextRoot"></entry>
+<entry key="Test.WaitSeconds">1</entry>
+<entry key="Test.InstantiationMaxRetry">5</entry>
+<!-- TestSleeps -->
+<entry key="TestSleeps.MilliSecondsBetweenKeyStrokes">100</entry>
+<entry key="TestSleeps.MilliSecondsBeforeClick">100</entry>
+<entry key="TestSleeps.MilliSecondsAfterClick">100</entry>
+<entry key="TestSleeps.MilliSecondSimulateInteractivePause">2000</entry>
+<entry key="TestSleeps.MilliSecondDurationOfSuccessMessage">3500</entry>
 </properties>

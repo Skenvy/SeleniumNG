@@ -22,13 +22,13 @@ public class DomainConstants {
 	 * Maps a DriverExtension enum value K to the path Domain Constant required
 	 * for the System.setProperty(...,K)
 	 */
-	public final static HashMap<DriverType,String> webDriverSystemPaths = new HashMap<DriverType,String>();
+	public static HashMap<DriverType,String> webDriverSystemPaths = new HashMap<DriverType,String>();
 	
-	public final Local local;
+	public static Local local = null;
 	
-	public final Test test;
+	public static Test test = null;
 	
-	public final TestSleeps testSleeps;
+	public static TestSleeps testSleeps = null;
 	
 	
 	/***
@@ -40,9 +40,9 @@ public class DomainConstants {
 	public DomainConstants(String configFilePath) throws IOException{
 		loadPropertiesFromXMLConfigFile(configFilePath);
 		assignWebDriverSystemPaths();
-		this.local = assignLocal();
-		this.test = assignTest();
-		this.testSleeps = assignTestSleeps();
+		local = assignLocal();
+		test = assignTest();
+		testSleeps = assignTestSleeps();
 	}
 	
 	private void loadPropertiesFromXMLConfigFile(String configFilePath) throws IOException{
@@ -59,28 +59,28 @@ public class DomainConstants {
 	}
 	
 	private Local assignLocal() {
-		int environPort;  //8080
-		String webContextRoot; //""
-		int waitSeconds; //1
-		int instantiationMaxRetry; //5
+		int environPort = getPropertyInteger(DomainConstantsProperties.LocalEnvironPort,DomainConstantsProperties.defaultEnvironPort);
+		String webContextRoot = properties.getProperty(DomainConstantsProperties.LocalWebContextRoot,DomainConstantsProperties.defaultWebContextRoot);
+		int waitSeconds = getPropertyInteger(DomainConstantsProperties.LocalWaitSeconds,DomainConstantsProperties.defaultWaitSeconds);
+		int instantiationMaxRetry = getPropertyInteger(DomainConstantsProperties.LocalInstantiationMaxRetry,DomainConstantsProperties.defaultInstantiationMaxRetry);
 		return new Local(environPort,webContextRoot,waitSeconds,instantiationMaxRetry);
 	}
 	
 	private Test assignTest() {
-		String environIP; //"localhost"
-		int environPort;  //8080
-		String webContextRoot; //""
-		int waitSeconds; //1
-		int instantiationMaxRetry; //5
+		String environIP = properties.getProperty(DomainConstantsProperties.TestEnvironIP,DomainConstantsProperties.defaultEnvironIP);
+		int environPort = getPropertyInteger(DomainConstantsProperties.TestEnvironPort,DomainConstantsProperties.defaultEnvironPort);
+		String webContextRoot = properties.getProperty(DomainConstantsProperties.TestWebContextRoot,DomainConstantsProperties.defaultWebContextRoot);
+		int waitSeconds = getPropertyInteger(DomainConstantsProperties.TestWaitSeconds,DomainConstantsProperties.defaultWaitSeconds);
+		int instantiationMaxRetry = getPropertyInteger(DomainConstantsProperties.TestInstantiationMaxRetry,DomainConstantsProperties.defaultInstantiationMaxRetry);
 		return new Test(environIP,environPort,webContextRoot,waitSeconds,instantiationMaxRetry);
 	}
 	
 	private TestSleeps assignTestSleeps() {
-		int milliSecondsBetweenKeyStrokes; //100
-		int milliSecondsBeforeClick; //100
-		int milliSecondsAfterClick; //100
-		int milliSecondSimulateInteractivePause; //2000
-		int milliSecondDurationOfSuccessMessage; //3500
+		int milliSecondsBetweenKeyStrokes = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondsBetweenKeyStrokes, DomainConstantsProperties.defaultMilliSecondsBetweenKeyStrokes);
+		int milliSecondsBeforeClick = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondsBeforeClick, DomainConstantsProperties.defaultMilliSecondsBeforeClick);
+		int milliSecondsAfterClick = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondsAfterClick, DomainConstantsProperties.defaultMilliSecondsAfterClick);
+		int milliSecondSimulateInteractivePause = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondSimulateInteractivePause, DomainConstantsProperties.defaultMilliSecondSimulateInteractivePause);
+		int milliSecondDurationOfSuccessMessage = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondDurationOfSuccessMessage, DomainConstantsProperties.defaultMilliSecondDurationOfSuccessMessage);
 		return new TestSleeps(milliSecondsBetweenKeyStrokes,milliSecondsBeforeClick,milliSecondsAfterClick,milliSecondSimulateInteractivePause,milliSecondDurationOfSuccessMessage);
 	}
 	
@@ -91,8 +91,6 @@ public class DomainConstants {
 		public final static String HTTP = "http";
 		public final static String HTTPS = "https";
 	}
-	
-	//Demarcation - Above is dynamic, below is static
 	
 	public class Local {
 		
@@ -118,11 +116,11 @@ public class DomainConstants {
 	
 	public class Test {
 		
-		public final String environIP; //"localhost"
-		public final int environPort;  //8080
-		public final String webContextRoot; //""
-		public final int waitSeconds; //1
-		public final int instantiationMaxRetry; //5
+		public final String environIP;
+		public final int environPort;
+		public final String webContextRoot;
+		public final int waitSeconds;
+		public final int instantiationMaxRetry;
 		
 		protected Test(String environIP, int environPort, String webContextRoot, int waitSeconds, int instantiationMaxRetry) {
 			this.environIP = environIP;
@@ -140,13 +138,13 @@ public class DomainConstants {
 		
 	}
 	
-	public class TestSleeps {
+	public static class TestSleeps {
 		
-		public final int MilliSecondsBetweenKeyStrokes; //100
-		public final int MilliSecondsBeforeClick; //100
-		public final int MilliSecondsAfterClick; //100
-		public final int MilliSecondSimulateInteractivePause; //2000
-		public final int MilliSecondDurationOfSuccessMessage; //3500
+		public final int MilliSecondsBetweenKeyStrokes;
+		public final int MilliSecondsBeforeClick;
+		public final int MilliSecondsAfterClick;
+		public final int MilliSecondSimulateInteractivePause;
+		public final int MilliSecondDurationOfSuccessMessage;
 		
 		protected TestSleeps(int milliSecondsBetweenKeyStrokes, int milliSecondsBeforeClick, int milliSecondsAfterClick, int milliSecondSimulateInteractivePause, int milliSecondDurationOfSuccessMessage) {
 			if(milliSecondsBetweenKeyStrokes <= 0) {
@@ -173,10 +171,15 @@ public class DomainConstants {
 		
 	}
 	
+	private int getPropertyInteger(String searchString, int defaultInt) {
+		return Integer.parseInt(properties.getProperty(searchString,String.valueOf(defaultInt)));
+	}
+	
+	//Demarcation - Above is dynamic, below is static
+	
 	public final static HashMap<String,DesiredCapabilities> seleniumNodes = new HashMap<String,DesiredCapabilities>() {{
 		/*LOCAL-WEBDRIVER*/ put(null,null);
 		///*LOCAL-GRIDNODE */ put("http://localhost:5555/wd/hub",DesiredCapabilities.chrome());
 	}};
-	
 	
 }

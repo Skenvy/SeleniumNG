@@ -15,8 +15,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.skenvy.SeleniumNG.DomainConstants;
-import com.skenvy.SeleniumNG.DomainConstants.localDefault;
-import com.skenvy.SeleniumNG.DomainConstants.testDefault;
 
 import java.net.InetAddress;
 import java.net.URI;
@@ -68,7 +66,7 @@ public abstract class NiceWebDriver {
 		} else {
 			this.webDriver = new RemoteWebDriver(getRemoteCapability());
 		}
-		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
+		this.wait = new WebDriverWait(this.webDriver,DomainConstants.local.waitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 	}
 	
@@ -94,7 +92,7 @@ public abstract class NiceWebDriver {
 	protected NiceWebDriver(String optionArgs){
 		MutableCapabilities mutableCapabilities = makeBrowserOptions(optionArgs);
 		this.webDriver = getDriver(mutableCapabilities);
-		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
+		this.wait = new WebDriverWait(this.webDriver,DomainConstants.local.waitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 	}
 	
@@ -104,7 +102,7 @@ public abstract class NiceWebDriver {
 	 */
 	protected NiceWebDriver(URL remoteAddress){
 		this.webDriver = new RemoteWebDriver(remoteAddress,getRemoteCapability());
-		this.wait = new WebDriverWait(this.webDriver,DomainConstants.localDefault.defaultWaitSeconds);
+		this.wait = new WebDriverWait(this.webDriver,DomainConstants.local.waitSeconds);
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 	}
 	
@@ -361,7 +359,7 @@ public abstract class NiceWebDriver {
 	 * @throws UnknownHostException
 	 */
 	public void openLocalHTTPWebPageWithSubroot(String contextRoot, String subrootQuery) throws UnknownHostException {
-		this.openHTTPOnHostPortContextRoot(this.getLocalIP(),DomainConstants.localDefault.environPort,contextRoot,subrootQuery);
+		this.openHTTPOnHostPortContextRoot(this.getLocalIP(),DomainConstants.local.environPort,contextRoot,subrootQuery);
 	}
 	
 	/***
@@ -381,7 +379,7 @@ public abstract class NiceWebDriver {
 	 * @throws UnknownHostException
 	 */
 	public void openLocalHTTPDefaultWebContextRootWithSubroot(String subrootQuery) throws UnknownHostException {
-		this.openLocalHTTPWebPageWithSubroot(DomainConstants.localDefault.webContextRoot,subrootQuery);
+		this.openLocalHTTPWebPageWithSubroot(DomainConstants.local.webContextRoot,subrootQuery);
 	}
 	
 	/***
@@ -399,7 +397,7 @@ public abstract class NiceWebDriver {
 	 * @param subrootQuery
 	 */
 	public void openTestDefaultWithSubroot(String subrootQuery) {
-		this.openHTTPOnHostPortContextRoot(DomainConstants.testDefault.environIP,DomainConstants.testDefault.environPort,DomainConstants.testDefault.webContextRoot,subrootQuery);
+		this.openHTTPOnHostPortContextRoot(DomainConstants.test.environIP,DomainConstants.test.environPort,DomainConstants.test.webContextRoot,subrootQuery);
 	}
 	
 	/***

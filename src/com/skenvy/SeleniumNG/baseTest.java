@@ -115,9 +115,9 @@ public abstract class baseTest {
 	@BeforeClass
 	public void beforeClass() throws MalformedURLException, FileNotFoundException {
 		if(remoteConfig == null) {
-			chrome = nwdf.getNiceWebDriver(DriverType.Chrome,"--incognito --start-maximized",DomainConstants.testDefault.defaultWaitSeconds);
+			chrome = nwdf.getNiceWebDriver(DriverType.Chrome,"--incognito --start-maximized",DomainConstants.test.waitSeconds);
 		} else {
-			chrome = nwdf.getNiceWebDriverRemote(DriverType.Chrome, new URL(remoteConfig.nodeUrl),DomainConstants.testDefault.defaultWaitSeconds);
+			chrome = nwdf.getNiceWebDriverRemote(DriverType.Chrome, new URL(remoteConfig.nodeUrl),DomainConstants.test.waitSeconds);
 		}
 	}
 
@@ -151,7 +151,7 @@ public abstract class baseTest {
 				Scanner scanner = new Scanner(System.in);
 				scanner.nextLine();
 			} else {
-				Thread.sleep(DomainConstants.testDefault.SleepMilliSeconds.simulateInteractivePause);
+				Thread.sleep(DomainConstants.testSleeps.MilliSecondSimulateInteractivePause);
 			}
 		}
 	}
@@ -162,28 +162,29 @@ public abstract class baseTest {
 	
 	private void sleepBeforeClicking() throws InterruptedException {
 		if(this.testIsBeingDemonstrated) {
-			Thread.sleep(DomainConstants.testDefault.SleepMilliSeconds.beforeClick);
+			Thread.sleep(DomainConstants.testSleeps.MilliSecondsBeforeClick);
 		}
 	}
 	
 	private void sleepAfterClicking() throws InterruptedException {
 		if(this.testIsBeingDemonstrated) {
-			Thread.sleep(DomainConstants.testDefault.SleepMilliSeconds.afterClick);
+			Thread.sleep(DomainConstants.testSleeps.MilliSecondsAfterClick);
 		}
 	}
 	
 	private void sleepBetweenKeyStrokes() throws InterruptedException {
 		if(this.testIsBeingDemonstrated) {
-			Thread.sleep(DomainConstants.testDefault.SleepMilliSeconds.betweenKeyStrokes);
+			Thread.sleep(DomainConstants.testSleeps.MilliSecondsBetweenKeyStrokes);
 		}
 	}
 	
 	protected void sleepForTheDurationOfAPrompt() throws InterruptedException {
-		Thread.sleep(DomainConstants.testDefault.SleepMilliSeconds.simulateInteractivePause);
+		Thread.sleep(DomainConstants.testSleeps.MilliSecondSimulateInteractivePause);
 	}
 	
 	protected void sleepForTheDurationOfASuccessMessagePrompt() throws InterruptedException {
-		Thread.sleep(DomainConstants.testDefault.SleepMilliSeconds.durationOfSuccessMessage);
+		nwdf.getDomainConstants();
+		Thread.sleep(DomainConstants.testSleeps.MilliSecondDurationOfSuccessMessage);
 	}
 	
 	protected WebElement clickOnCSSElementIfExists(String cssSelector) throws InterruptedException {
