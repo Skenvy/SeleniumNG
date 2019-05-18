@@ -1,69 +1,176 @@
 package com.skenvy.SeleniumNG;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
 
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
+
 public class DomainConstants {
 	
-	private final Properties properties = new Properties();
+	/***
+	 * Stores the properties read in from the config file.
+	 */
+	private final static Properties properties = new Properties();
 	
+	/***
+	 * Maps a DriverExtension enum value K to the path Domain Constant required
+	 * for the System.setProperty(...,K)
+	 */
+	public final static HashMap<DriverType,String> webDriverSystemPaths = new HashMap<DriverType,String>();
+	
+	public final Local local;
+	
+	public final Test test;
+	
+	public final TestSleeps testSleeps;
+	
+	
+	/***
+	 * Construct the properties and assign the values to the dictionaries
+	 * returned by this class.
+	 * @param configFilePath
+	 * @throws IOException
+	 */
 	public DomainConstants(String configFilePath) throws IOException{
+		loadPropertiesFromXMLConfigFile(configFilePath);
+		assignWebDriverSystemPaths();
+		this.local = assignLocal();
+		this.test = assignTest();
+		this.testSleeps = assignTestSleeps();
+	}
+	
+	private void loadPropertiesFromXMLConfigFile(String configFilePath) throws IOException{
 		//Read in the properties then close the file
 		FileInputStream in = new FileInputStream(configFilePath);
 		properties.loadFromXML(in);
 		in.close();
-		//Assign the properties to the hashtables
-		webDriverSystemPaths = new HashMap<DriverType,String>(){{
-			put(DriverType.Chrome,properties.getProperty("webDriverSystemPaths.Chrome"));
-			put(DriverType.Firefox,properties.getProperty("defaultWebDriverSystemPaths.Firefox"));
-			put(DriverType.IE,properties.getProperty("defaultWebDriverSystemPaths.IE"));
-			put(DriverType.Edge,properties.getProperty("defaultWebDriverSystemPaths.Edge"));
-			put(DriverType.Opera,properties.getProperty("defaultWebDriverSystemPaths.Opera"));
-			put(DriverType.Safari,properties.getProperty("defaultWebDriverSystemPaths.Safari"));
-			put(DriverType.iOS_iPhone,properties.getProperty("defaultWebDriverSystemPaths.iOS_iPhone"));
-			put(DriverType.iOS_iPad,properties.getProperty("defaultWebDriverSystemPaths.iOS_iPad"));
-			put(DriverType.Android,properties.getProperty("defaultWebDriverSystemPaths.Android"));
-			put(DriverType.HtmlUnit,properties.getProperty("defaultWebDriverSystemPaths.HtmlUnit"));
-		}};
+	}
+	
+	private void assignWebDriverSystemPaths() {
+		for(DriverType dt : DriverType.values()) {
+			webDriverSystemPaths.put(dt,properties.getProperty(DomainConstantsProperties.webDriverSystemPathPerDriverType.get(dt)));
+		}
+	}
+	
+	private Local assignLocal() {
+		int environPort;  //8080
+		String webContextRoot; //""
+		int waitSeconds; //1
+		int instantiationMaxRetry; //5
+		return new Local(environPort,webContextRoot,waitSeconds,instantiationMaxRetry);
+	}
+	
+	private Test assignTest() {
+		String environIP; //"localhost"
+		int environPort;  //8080
+		String webContextRoot; //""
+		int waitSeconds; //1
+		int instantiationMaxRetry; //5
+		return new Test(environIP,environPort,webContextRoot,waitSeconds,instantiationMaxRetry);
+	}
+	
+	private TestSleeps assignTestSleeps() {
+		int milliSecondsBetweenKeyStrokes; //100
+		int milliSecondsBeforeClick; //100
+		int milliSecondsAfterClick; //100
+		int milliSecondSimulateInteractivePause; //2000
+		int milliSecondDurationOfSuccessMessage; //3500
+		return new TestSleeps(milliSecondsBetweenKeyStrokes,milliSecondsBeforeClick,milliSecondsAfterClick,milliSecondSimulateInteractivePause,milliSecondDurationOfSuccessMessage);
 	}
 	
 	/***
-	 * Maps a DriverExtension enum value K to the path Domain Constant required for the System.setProperty(...,K)
+	 * Returns static string components of urls.
 	 */
-	public final HashMap<DriverType,String> webDriverSystemPaths;
+	public class UrlConstants {
+		public final static String HTTP = "http";
+		public final static String HTTPS = "https";
+	}
 	
 	//Demarcation - Above is dynamic, below is static
 	
-	public class localDefault {
-		public final static int environPort = 8080;
-		public final static String webContextRoot = "";
-		public final static int defaultWaitSeconds = 1;
-		public final static int defaultChromeInstantiationMaxRetry = 5;
+	public class Local {
+		
+		public final int environPort;
+		public final String webContextRoot;
+		public final int waitSeconds;
+		public final int instantiationMaxRetry;
+		
+		protected Local(int environPort, String webContextRoot, int waitSeconds, int instantiationMaxRetry){
+			this.environPort = environPort;
+			this.webContextRoot = webContextRoot;
+			if(waitSeconds <= 0) {
+				throw new ValueException("Local.WaitSeconds must be greater than 0");
+			}
+			this.waitSeconds = waitSeconds;
+			if(instantiationMaxRetry <= 0) {
+				throw new ValueException("Local.InstantiationMaxRetry must be greater than 0");
+			}
+			this.instantiationMaxRetry = instantiationMaxRetry;
+		}
+		
 	}
 	
-	public class testDefault {
-		//These are the "host" environment IP and Port
-		public final static String environIP = "localhost";
-		public final static int environPort = 8080;
-		public final static String webContextRoot = "";
-		public final static int defaultWaitSeconds = 1;
-		public final static int defaultChromeInstantiationMaxRetry = 5;
+	public class Test {
 		
-		public class SleepMilliSeconds {
-			public final static int betweenKeyStrokes = 100;
-			public final static int beforeClick = 100;
-			public final static int afterClick = 100;
-			public final static int simulateInteractivePause = 2000;
-			public final static int durationOfSuccessMessage = 3500;
+		public final String environIP; //"localhost"
+		public final int environPort;  //8080
+		public final String webContextRoot; //""
+		public final int waitSeconds; //1
+		public final int instantiationMaxRetry; //5
+		
+		protected Test(String environIP, int environPort, String webContextRoot, int waitSeconds, int instantiationMaxRetry) {
+			this.environIP = environIP;
+			this.environPort = environPort;
+			this.webContextRoot = webContextRoot;
+			if(waitSeconds <= 0) {
+				throw new ValueException("Test.WaitSeconds must be greater than 0");
+			}
+			this.waitSeconds = waitSeconds;
+			if(instantiationMaxRetry <= 0) {
+				throw new ValueException("Test.InstantiationMaxRetry must be greater than 0");
+			}
+			this.instantiationMaxRetry = instantiationMaxRetry;
 		}
+		
+	}
+	
+	public class TestSleeps {
+		
+		public final int MilliSecondsBetweenKeyStrokes; //100
+		public final int MilliSecondsBeforeClick; //100
+		public final int MilliSecondsAfterClick; //100
+		public final int MilliSecondSimulateInteractivePause; //2000
+		public final int MilliSecondDurationOfSuccessMessage; //3500
+		
+		protected TestSleeps(int milliSecondsBetweenKeyStrokes, int milliSecondsBeforeClick, int milliSecondsAfterClick, int milliSecondSimulateInteractivePause, int milliSecondDurationOfSuccessMessage) {
+			if(milliSecondsBetweenKeyStrokes <= 0) {
+				throw new ValueException("TestSleeps.MilliSecondsBetweenKeyStrokes must be greater than 0");
+			}
+			if(milliSecondsBeforeClick <= 0) {
+				throw new ValueException("TestSleeps.MilliSecondsBeforeClick must be greater than 0");
+			}
+			if(milliSecondsAfterClick <= 0) {
+				throw new ValueException("TestSleeps.MilliSecondsAfterClick must be greater than 0");
+			}
+			if(milliSecondSimulateInteractivePause <= 0) {
+				throw new ValueException("TestSleeps.MilliSecondSimulateInteractivePause must be greater than 0");
+			}
+			if(milliSecondDurationOfSuccessMessage <= 0) {
+				throw new ValueException("TestSleeps.MilliSecondDurationOfSuccessMessage must be greater than 0");
+			}
+			this.MilliSecondsBetweenKeyStrokes = milliSecondsBetweenKeyStrokes;
+			this.MilliSecondsBeforeClick = milliSecondsBeforeClick;
+			this.MilliSecondsAfterClick = milliSecondsAfterClick;
+			this.MilliSecondSimulateInteractivePause = milliSecondSimulateInteractivePause;
+			this.MilliSecondDurationOfSuccessMessage = milliSecondDurationOfSuccessMessage;
+		}
+		
 	}
 	
 	public final static HashMap<String,DesiredCapabilities> seleniumNodes = new HashMap<String,DesiredCapabilities>() {{
@@ -71,8 +178,5 @@ public class DomainConstants {
 		///*LOCAL-GRIDNODE */ put("http://localhost:5555/wd/hub",DesiredCapabilities.chrome());
 	}};
 	
-	public class UrlConstants {
-		public final static String HTTP = "http";
-		public final static String HTTPS = "https";
-	}
+	
 }

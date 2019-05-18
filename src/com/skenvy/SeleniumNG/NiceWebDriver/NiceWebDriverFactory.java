@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -13,7 +12,14 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.skenvy.SeleniumNG.DomainConstants;
 
-
+/***
+ * A singleton factory used to instantiate subclasses of the abstract
+ * NiceWebDriver, either as local or remote. Use the getFactory method to
+ * obtain the factory, supplying the getFactory method with a path to the 
+ * config file associated with the DomainConstants class. The only fields
+ * expected by this class are those that set the full system path to the 
+ * drivers'
+ */
 public class NiceWebDriverFactory {
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -41,13 +47,26 @@ public class NiceWebDriverFactory {
 	}
 	
 	/***
-	 * Get the singleton factory NiceWebDriverFactory.
+	 * Get the singleton factory NiceWebDriverFactory, requiring the path to
+	 * the configuration file.
 	 * @return NiceWebDriverFactory
 	 * @throws IOException 
 	 */
 	public static NiceWebDriverFactory getFactory(String configFilePath) throws IOException {
 		if(instance == null) {
 			instance = new NiceWebDriverFactory(configFilePath);
+		}
+		return instance;
+	}
+	
+	/***
+	 * Get the singleton factory NiceWebDriverFactory.
+	 * @return NiceWebDriverFactory
+	 * @throws FileNotFoundException 
+	 */
+	public static NiceWebDriverFactory getFactory() throws FileNotFoundException {
+		if(instance == null) {
+			throw new FileNotFoundException("Before you can call the parameterless getFactory, you must call it once with path to the configuration file.");
 		}
 		return instance;
 	}
