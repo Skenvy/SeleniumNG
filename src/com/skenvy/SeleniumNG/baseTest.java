@@ -22,6 +22,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 
+import com.skenvy.SeleniumNG.DomainConstants.SeleniumNode;
 import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceChrome;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriver;
@@ -29,28 +30,14 @@ import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriverFactory;
 
 public abstract class baseTest {
 	
-	protected NiceWebDriver chrome;
-	private RemoteConfig remoteConfig = null;
+	protected NiceWebDriver nwd;
+	private SeleniumNode seleniumNode = null;
 	private boolean testInDevelopment = false;
 	private boolean testIsBeingDemonstrated = false;
 	private final NiceWebDriverFactory nwdf;
 	
-	baseTest(String configFilePath) throws IOException{
-		nwdf = NiceWebDriverFactory.getFactory(configFilePath);
-	}
-	
-	private class RemoteConfig{
-		
-		String nodeUrl;
-		DesiredCapabilities capabilities;
-		
-	}
-	
-	public baseTest startAsRemote(String nodeUrl, DesiredCapabilities capabilities) {
-		this.remoteConfig = new RemoteConfig();
-		this.remoteConfig.nodeUrl = nodeUrl;
-		this.remoteConfig.capabilities = capabilities;
-		return this;
+	public baseTest() {
+		nwdf = NiceWebDriverFactory.getFactory(getPathToDomainConstantsConfig());
 	}
 	
 	/***
@@ -65,17 +52,17 @@ public abstract class baseTest {
 	@Factory
 	public Object[] createInstances() throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// Create an array the size of the Selenium node configuration constant
-		Object[] result = new Object[DomainConstants.seleniumNodes.size()];
-		// We need to translate the iteration of a set into an array
+		Object[] result = new Object[DomainConstants.seleniumNodes.length];
+		// We need to translate the iteration of a forall into an array
 		// So we use an incrementer ++ and for(any:all)
 		int incr = 0;
-		for(String nodeUrl : DomainConstants.seleniumNodes.keySet()) {
-			if(DomainConstants.seleniumNodes.get(nodeUrl) == null) {
+		for(SeleniumNode seleniumNode : DomainConstants.seleniumNodes) {
+			if(seleniumNode.local) {
 				// If the node maps to a null DesiredCapabilites then it must be a local instance
-				result[incr] = this.newLocal(getPathToDomainConstantsConfig());
+				result[incr] = this.newLocal(seleniumNode.dt);
 			} else {
 				// Otherwise we can procure a new remote instance using the de
-				result[incr] = this.newRemote(getPathToDomainConstantsConfig(),nodeUrl,DomainConstants.seleniumNodes.get(nodeUrl));
+				result[incr] = this.newRemote(seleniumNode.nodeUrl,seleniumNode.dt);
 			}
 			incr++;
 		}
@@ -84,25 +71,23 @@ public abstract class baseTest {
 	
 	public abstract String getPathToDomainConstantsConfig();
 	
-	public baseTest newSubClassInstance(String configFilePath) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	public baseTest newSubClassInstance() throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// Get the Class object, cast to an extension of this class, from the class name of the object calling this method
 		Class<? extends baseTest> thisClass = (Class<? extends baseTest>) Class.forName(this.getClass().getName());
 		// Create a new instance of the sub class from its parameterless constructor, typed to this baseTest class
-		baseTest newObj = thisClass.getConstructor(new Class[] { String.class }).newInstance(configFilePath);
+		baseTest newObj = thisClass.getConstructor().newInstance();
 		return newObj;
 	}
 	
-	public baseTest newLocal(String configFilePath) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		baseTest newObj = this.newSubClassInstance(configFilePath);
-		newObj.remoteConfig = null;
+	public baseTest newLocal(DriverType driverType) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		baseTest newObj = this.newSubClassInstance();
+		newObj.seleniumNode = new SeleniumNode(true,null,driverType);
 		return newObj;
 	}
 	
-	public baseTest newRemote(String configFilePath, String nodeUrl, DesiredCapabilities capabilities) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		baseTest newObj = this.newSubClassInstance(configFilePath);
-		newObj.remoteConfig = new RemoteConfig();
-		newObj.remoteConfig.nodeUrl = nodeUrl;
-		newObj.remoteConfig.capabilities = capabilities;
+	public baseTest newRemote(URL nodeUrl, DriverType driverType) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		baseTest newObj = this.newSubClassInstance();
+		newObj.seleniumNode = new SeleniumNode(false,nodeUrl,driverType);
 		return newObj;
 	}
 	
@@ -114,10 +99,10 @@ public abstract class baseTest {
   
 	@BeforeClass
 	public void beforeClass() throws MalformedURLException, FileNotFoundException {
-		if(remoteConfig == null) {
-			chrome = nwdf.getNiceWebDriver(DriverType.Chrome,"--incognito --start-maximized",DomainConstants.test.waitSeconds);
+		if(seleniumNode.local) {
+			nwd = nwdf.getNiceWebDriver(seleniumNode.dt,"--incognito --start-maximized",DomainConstants.test.waitSeconds);
 		} else {
-			chrome = nwdf.getNiceWebDriverRemote(DriverType.Chrome, new URL(remoteConfig.nodeUrl),DomainConstants.test.waitSeconds);
+			nwd = nwdf.getNiceWebDriverRemote(seleniumNode.dt, seleniumNode.nodeUrl ,DomainConstants.test.waitSeconds);
 		}
 	}
 
@@ -126,14 +111,14 @@ public abstract class baseTest {
 		if(this.testInDevelopment) {
 			//This does nothing currently to block the closing of the window
 		} else {
-			chrome.closeWebDriver();
-			chrome = null;
+			nwd.closeWebDriver();
+			nwd = null;
 		}
 	}
 	
 	@BeforeMethod
 	public void beforeMethod() {
-		chrome.openTestDefaultAtBase();
+		nwd.openTestDefaultAtBase();
 	}
 	
 	public void declareThisTestAsCurrentlyBeingUnderDevelopment() {
@@ -146,7 +131,7 @@ public abstract class baseTest {
 	
 	public void promptEnterKey() throws InterruptedException{
 		if(this.testIsBeingDemonstrated) {
-			if(chrome.isRunningRemotely()) {
+			if(nwd.isRunningRemotely()) {
 				System.out.println("Press \"ENTER\" to continue...");
 				Scanner scanner = new Scanner(System.in);
 				scanner.nextLine();
@@ -189,42 +174,42 @@ public abstract class baseTest {
 	
 	protected WebElement clickOnCSSElementIfExists(String cssSelector) throws InterruptedException {
 		sleepBeforeClicking();
-		WebElement we = chrome.clickOnCSSElementIfExists(cssSelector);
+		WebElement we = nwd.clickOnCSSElementIfExists(cssSelector);
 		sleepAfterClicking();
 		return we;
 	}
 	
 	protected WebElement clickOnXPathElementIfExists(String xpath) throws InterruptedException {
 		sleepBeforeClicking();
-		WebElement we = chrome.clickOnXPathElementIfExists(xpath);
+		WebElement we = nwd.clickOnXPathElementIfExists(xpath);
 		sleepAfterClicking();
 		return we;
 	}
 	
 	protected WebElement clickOnLinkTextElementIfExists(String linkText) throws InterruptedException {
 		sleepBeforeClicking();
-		WebElement we = chrome.clickOnLinkTextElementIfExists(linkText);
+		WebElement we = nwd.clickOnLinkTextElementIfExists(linkText);
 		sleepAfterClicking();
 		return we;
 	}
 	
 	protected WebElement clickOnIdElementIfExists(String id) throws InterruptedException {
 		sleepBeforeClicking();
-		WebElement we = chrome.clickOnIdElementIfExists(id);
+		WebElement we = nwd.clickOnIdElementIfExists(id);
 		sleepAfterClicking();
 		return we;
 	}
 	
 	protected WebElement clickOnAnchorHrefElementIfExists(String href, boolean visibleOnly) throws InterruptedException {
 		sleepBeforeClicking();
-		WebElement we = chrome.clickOnAnchorHrefElementIfExists(href,visibleOnly);
+		WebElement we = nwd.clickOnAnchorHrefElementIfExists(href,visibleOnly);
 		sleepAfterClicking();
 		return we;
 	}
 	
 	protected void sendKeysToAWebElement(WebElement we, String keyStrokes) throws InterruptedException {
 		for(char keyStroke : keyStrokes.toCharArray()) {
-			chrome.sendKeysToAWebElement(we,keyStroke+"");
+			nwd.sendKeysToAWebElement(we,keyStroke+"");
 			sleepBetweenKeyStrokes();
 		}
 	}
@@ -247,8 +232,8 @@ public abstract class baseTest {
 	 */
 	
 	protected void AssertSubrootDoesNotLeadTo404(String subroot) {
-		chrome.openTestDefaultWithSubroot(subroot);
-		Assert.assertFalse(chrome.isWebPage404());
+		nwd.openTestDefaultWithSubroot(subroot);
+		Assert.assertFalse(nwd.isWebPage404());
 	}
 	
 	/*
@@ -257,17 +242,17 @@ public abstract class baseTest {
 	
 	protected void AssertHrefExists(String methodName, String href) {
 		System.out.println(methodName+": expect next web element locator to pass");
-		Assert.assertTrue(chrome.AnchorExistsWithHREF(href, false));
+		Assert.assertTrue(nwd.AnchorExistsWithHREF(href, false));
 	}
 	
 	protected void AssertHrefNotVisible(String methodName, String href) {
 		System.out.println(methodName+": expect next web element locator to fail");
-		Assert.assertFalse(chrome.AnchorExistsWithHREF(href, true));
+		Assert.assertFalse(nwd.AnchorExistsWithHREF(href, true));
 	}
 	
 	protected void AssertHrefExistsAndIsVisible(String methodName, String href) {
 		System.out.println(methodName+": expect next web element locator to pass");
-		Assert.assertTrue(chrome.AnchorExistsWithHREF(href, true));
+		Assert.assertTrue(nwd.AnchorExistsWithHREF(href, true));
 	}
 	
 	protected void AssertHrefExistsButIsHidden(String methodName, String href) {
@@ -277,7 +262,7 @@ public abstract class baseTest {
 	
 	protected void AssertHrefDoesNotExist(String methodName, String href) {
 		System.out.println(methodName+": expect next web element locator to fail");
-		Assert.assertFalse(chrome.AnchorExistsWithHREF(href, false));
+		Assert.assertFalse(nwd.AnchorExistsWithHREF(href, false));
 	}
 	
 	/*
@@ -285,17 +270,17 @@ public abstract class baseTest {
 	 */
 	
 	protected void AssertDropdownMenuClickableAndExists(String anchorId) {
-		Assert.assertNotNull(chrome.clickOnCSSElementIfExists(anchorId));
+		Assert.assertNotNull(nwd.clickOnCSSElementIfExists(anchorId));
 	}
 	
 	protected void AssertHyperlinkExistsAndIsClickable(String href) {
-		String query = chrome.AnchorQueryStringForHREF(href, true);
-		Assert.assertNotNull(chrome.clickOnCSSElementIfExists(query));
+		String query = nwd.AnchorQueryStringForHREF(href, true);
+		Assert.assertNotNull(nwd.clickOnCSSElementIfExists(query));
 	}
 	
 	protected void AssertHyperlinkExistsAndIsClickableAndDoesNotLeadTo404(String href) {
 		AssertHyperlinkExistsAndIsClickable(href);
-		Assert.assertFalse(chrome.isWebPage404());
+		Assert.assertFalse(nwd.isWebPage404());
 	}
 	
 	/*

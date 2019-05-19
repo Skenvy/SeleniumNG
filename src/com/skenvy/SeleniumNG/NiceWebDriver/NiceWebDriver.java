@@ -190,7 +190,7 @@ public abstract class NiceWebDriver {
 			if(oArgs[0].getClass().getName().equals("java.lang.Boolean")) {
 				if(oArgs.length == 2) {
 					if(oArgs[1].getClass().getName().equals("java.lang.Integer")) {
-						return InvokeContsructorWithArguments((boolean) oArgs[0], (int) oArgs[0]);
+						return InvokeContsructorWithArguments((boolean) oArgs[0], (int) oArgs[1]);
 					}
 				} else {
 					return InvokeContsructorWithArguments((boolean) oArgs[0]);
@@ -198,7 +198,7 @@ public abstract class NiceWebDriver {
 			} else if(oArgs[0].getClass().getName().equals("java.lang.String")) {
 				if(oArgs.length == 2) {
 					if(oArgs[1].getClass().getName().equals("java.lang.Integer")) {
-						return InvokeContsructorWithArguments((String) oArgs[0], (int) oArgs[0]);
+						return InvokeContsructorWithArguments((String) oArgs[0], (int) oArgs[1]);
 					}
 				} else {
 					return InvokeContsructorWithArguments((String) oArgs[0]);
@@ -206,7 +206,7 @@ public abstract class NiceWebDriver {
 			} else if(oArgs[0].getClass().getName().equals("java.net.URL")) {
 				if(oArgs.length == 2) {
 					if(oArgs[1].getClass().getName().equals("java.lang.Integer")) {
-						return InvokeContsructorWithArguments((URL) oArgs[0], (int) oArgs[0]);
+						return InvokeContsructorWithArguments((URL) oArgs[0], (int) oArgs[1]);
 					}
 				} else {
 					return InvokeContsructorWithArguments((URL) oArgs[0]);

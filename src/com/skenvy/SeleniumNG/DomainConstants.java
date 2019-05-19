@@ -2,6 +2,8 @@ package com.skenvy.SeleniumNG;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
 
@@ -30,6 +32,10 @@ public class DomainConstants {
 	
 	public static TestSleeps testSleeps = null;
 	
+	public static int seleniumNodeCount = 0;
+	
+	public static SeleniumNode[] seleniumNodes = null;
+	
 	
 	/***
 	 * Construct the properties and assign the values to the dictionaries
@@ -43,6 +49,8 @@ public class DomainConstants {
 		local = assignLocal();
 		test = assignTest();
 		testSleeps = assignTestSleeps();
+		seleniumNodeCount = assignSeleniumNodeCount();
+		assignSeleniumNodes();
 	}
 	
 	private void loadPropertiesFromXMLConfigFile(String configFilePath) throws IOException{
@@ -82,6 +90,52 @@ public class DomainConstants {
 		int milliSecondSimulateInteractivePause = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondSimulateInteractivePause, DomainConstantsProperties.defaultMilliSecondSimulateInteractivePause);
 		int milliSecondDurationOfSuccessMessage = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondDurationOfSuccessMessage, DomainConstantsProperties.defaultMilliSecondDurationOfSuccessMessage);
 		return new TestSleeps(milliSecondsBetweenKeyStrokes,milliSecondsBeforeClick,milliSecondsAfterClick,milliSecondSimulateInteractivePause,milliSecondDurationOfSuccessMessage);
+	}
+	
+	private int assignSeleniumNodeCount() {
+		return getPropertyInteger(DomainConstantsProperties.SeleniumNodeCount, DomainConstantsProperties.defaultSeleniumNodeCount);
+	}
+	
+	private void assignSeleniumNodes() throws MalformedURLException {
+		seleniumNodes = new SeleniumNode[seleniumNodeCount];
+		for(int k = 1; k <= seleniumNodeCount; k++) {
+			String localNodeString = properties.getProperty(DomainConstantsProperties.SeleniumNodeLocal+k);
+			boolean localNode = (localNodeString.equalsIgnoreCase("True"));
+			String dcString = properties.getProperty(DomainConstantsProperties.SeleniumNodeDriverType+k);
+			DriverType dt = DriverType.valueOf(dcString);
+			URL nodeUrl = null;
+			if(!localNode) {
+				nodeUrl = new URL(properties.getProperty(DomainConstantsProperties.SeleniumNodeRemoteURL+k));
+			} 
+			seleniumNodes[k-1] = new SeleniumNode(localNode, nodeUrl, dt);
+		}
+	}
+	
+	private DesiredCapabilities getDesiredCapabilitiesForDriverType(DriverType dt) {
+		switch(dt) {
+			case Chrome:
+				return DesiredCapabilities.chrome();
+			case Firefox:
+				return DesiredCapabilities.firefox();
+			case IE:
+				return DesiredCapabilities.internetExplorer();
+			case Edge:
+				return DesiredCapabilities.edge();
+			case Opera:
+				return DesiredCapabilities.opera();
+			case Safari:
+				return DesiredCapabilities.safari();
+			case iOS_iPhone:
+				return DesiredCapabilities.iphone();
+			case iOS_iPad:
+				return DesiredCapabilities.ipad();
+			case Android:
+				return DesiredCapabilities.android();
+			case HtmlUnit:
+				return DesiredCapabilities.htmlUnit();
+			default:
+				return null;
+		}
 	}
 	
 	/***
@@ -138,7 +192,7 @@ public class DomainConstants {
 		
 	}
 	
-	public static class TestSleeps {
+	public class TestSleeps {
 		
 		public final int MilliSecondsBetweenKeyStrokes;
 		public final int MilliSecondsBeforeClick;
@@ -175,11 +229,18 @@ public class DomainConstants {
 		return Integer.parseInt(properties.getProperty(searchString,String.valueOf(defaultInt)));
 	}
 	
-	//Demarcation - Above is dynamic, below is static
-	
-	public final static HashMap<String,DesiredCapabilities> seleniumNodes = new HashMap<String,DesiredCapabilities>() {{
-		/*LOCAL-WEBDRIVER*/ put(null,null);
-		///*LOCAL-GRIDNODE */ put("http://localhost:5555/wd/hub",DesiredCapabilities.chrome());
-	}};
+	public static class SeleniumNode{
+		
+		public final boolean local;
+		public final URL nodeUrl;
+		public final DriverType dt;
+		
+		public SeleniumNode(boolean local, URL nodeUrl, DriverType dt) {
+			this.local = local;
+			this.nodeUrl = nodeUrl;
+			this.dt = dt;
+		}
+		
+	}
 	
 }

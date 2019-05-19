@@ -30,4 +30,14 @@
 <entry key="TestSleeps.MilliSecondsAfterClick">100</entry>
 <entry key="TestSleeps.MilliSecondSimulateInteractivePause">2000</entry>
 <entry key="TestSleeps.MilliSecondDurationOfSuccessMessage">3500</entry>
+<!-- SeleniumNodes -->
+<entry key="SeleniumNodeCount">1</entry>
+<entry key="SeleniumNodeLocal_1">True</entry> <!-- If local is true, no need to specify an url, only the driver type -->
+<entry key="SeleniumNodeDriverType_1">Chrome</entry>
+<!--
+<entry key="SeleniumNodeCount">2</entry>
+<entry key="SeleniumNodeLocal_2">False</entry> # Anything other than an explicit "true" will be read as false
+<entry key="SeleniumNodeRemoteURL_2">http://localhost:5555/wd/hub</entry>
+<entry key="SeleniumNodeDriverType_2">Chrome</entry>
+-->
 </properties>

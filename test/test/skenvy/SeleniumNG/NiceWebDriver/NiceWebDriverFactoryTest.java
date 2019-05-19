@@ -18,8 +18,8 @@ public class NiceWebDriverFactoryTest {
 
 	public static void main(String[] args) throws IOException {
 		NiceWebDriverFactory nwdf = NiceWebDriverFactory.getFactory("C:\\workspaces\\MYGITHUB\\SeleniumNG\\config.xml");
-		System.out.println(DomainConstants.webDriverSystemPaths.get(DriverType.Chrome));
-		//NiceWebDriver a = NiceWebDriverFactory.getFactory().getNiceWebDriver(DriverType.Chrome, "--incognito --start-maximized");
+		//System.out.println(DomainConstants.webDriverSystemPaths.get(DriverType.Chrome));
+		NiceWebDriver a = NiceWebDriverFactory.getFactory().getNiceWebDriver(DriverType.Chrome, "--incognito --start-maximized");
 		//a.openWebPage("https://www.google.com");
 	}
 

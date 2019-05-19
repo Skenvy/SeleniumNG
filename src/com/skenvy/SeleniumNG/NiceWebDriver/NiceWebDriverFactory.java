@@ -41,16 +41,21 @@ public class NiceWebDriverFactory {
 	 * Instantiate the NiceWebDriverFactory singleton
 	 * @throws IOException 
 	 */
-	private NiceWebDriverFactory(String configFilePath) throws IOException{
+	private NiceWebDriverFactory(String configFilePath){
 		driversSet = new ArrayList<DriverType>();
-		domainConstants = new DomainConstants(configFilePath);
+		try {
+			domainConstants = new DomainConstants(configFilePath);
+		} catch (IOException e) {
+			domainConstants = null;
+			e.printStackTrace();
+		}
 	}
 	
 	/***
 	 * Instantiate the NiceWebDriverFactory singleton
 	 * @throws IOException 
 	 */
-	private NiceWebDriverFactory(DomainConstants domainConstants) throws IOException{
+	private NiceWebDriverFactory(DomainConstants domainConstants){
 		driversSet = new ArrayList<DriverType>();
 		this.domainConstants = domainConstants;
 	}
@@ -61,7 +66,7 @@ public class NiceWebDriverFactory {
 	 * @return NiceWebDriverFactory
 	 * @throws IOException 
 	 */
-	public static NiceWebDriverFactory getFactory(String configFilePath) throws IOException {
+	public static NiceWebDriverFactory getFactory(String configFilePath){
 		if(instance == null) {
 			instance = new NiceWebDriverFactory(configFilePath);
 		}
@@ -73,7 +78,7 @@ public class NiceWebDriverFactory {
 	 * @return NiceWebDriverFactory
 	 * @throws IOException 
 	 */
-	public static NiceWebDriverFactory getFactory(DomainConstants domainConstants) throws IOException {
+	public static NiceWebDriverFactory getFactory(DomainConstants domainConstants){
 		if(instance == null) {
 			instance = new NiceWebDriverFactory(domainConstants);
 		}

@@ -59,4 +59,11 @@ public class DomainConstantsProperties {
 	public final static String TestSleepsMilliSecondSimulateInteractivePause = TestSleeps+"."+MilliSecondSimulateInteractivePause;
 	public final static String TestSleepsMilliSecondDurationOfSuccessMessage = TestSleeps+"."+MilliSecondDurationOfSuccessMessage;
 	
+	private final static String SeleniumNode = "SeleniumNode";
+	public final static String SeleniumNodeCount = SeleniumNode+"Count";
+	public final static int defaultSeleniumNodeCount = 0;
+	public final static String SeleniumNodeLocal = SeleniumNode+"Local_";
+	public final static String SeleniumNodeRemoteURL = SeleniumNode+"RemoteURL_";
+	public final static String SeleniumNodeDriverType = SeleniumNode+"DriverType_";
+	
 }

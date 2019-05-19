@@ -1,14 +1,21 @@
 package test.skenvy.SeleniumNG;
 
-public class baseTest {
+import java.io.IOException;
 
-	public baseTest() {
-		// TODO Auto-generated constructor stub
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+public class baseTest extends com.skenvy.SeleniumNG.baseTest {
+
+	@Test
+	public void CanOpenDefaultWebContextRoot() {
+		nwd.openWebPage("http://www.google.com");
+		Assert.assertTrue(true);
 	}
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+	@Override
+	public String getPathToDomainConstantsConfig() {
+		return "C:\\workspaces\\MYGITHUB\\SeleniumNG\\config.xml";
 	}
 
 }
