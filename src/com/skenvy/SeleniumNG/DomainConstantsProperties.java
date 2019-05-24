@@ -4,11 +4,17 @@ import java.util.HashMap;
 
 import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
 
-public class DomainConstantsProperties {
+/***
+ * A class to hold all "final static" string names for fields and string and 
+ * integer defaults. All protected members are for destringifying the 
+ * DomainConstants class
+ */
+final class DomainConstantsProperties {
 
-	public final static String webDriverSystemPaths = "WebDriverSystemPaths";
+	protected final static String webDriverSystemPaths = "WebDriverSystemPaths";
 	
-	public final static HashMap<DriverType,String> webDriverSystemPathPerDriverType = new HashMap<DriverType,String>(){{
+	@SuppressWarnings("serial")
+	protected final static HashMap<DriverType,String> webDriverSystemPathPerDriverType = new HashMap<DriverType,String>(){{
 		for(DriverType dt : DriverType.values()) {
 			put(dt,(webDriverSystemPaths+"."+dt.toString()));
 		}
@@ -24,22 +30,22 @@ public class DomainConstantsProperties {
 	private final static String WaitSeconds = "WaitSeconds";
 	private final static String InstantiationMaxRetry = "InstantiationMaxRetry";
 	
-	public final static String defaultEnvironIP = "localhost";
-	public final static int defaultEnvironPort = 8080;
-	public final static String defaultWebContextRoot = "";
-	public final static int defaultWaitSeconds = 1;
-	public final static int defaultInstantiationMaxRetry = 5;
+	protected final static String defaultEnvironIP = "localhost";
+	protected final static int defaultEnvironPort = 8080;
+	protected final static String defaultWebContextRoot = "";
+	protected final static int defaultWaitSeconds = 1;
+	protected final static int defaultInstantiationMaxRetry = 5;
 	
-	public final static String LocalEnvironPort = Local+"."+EnvironPort;
-	public final static String LocalWebContextRoot = Local+"."+WebContextRoot;
-	public final static String LocalWaitSeconds = Local+"."+WaitSeconds;
-	public final static String LocalInstantiationMaxRetry = Local+"."+InstantiationMaxRetry;
+	protected final static String LocalEnvironPort = Local+"."+EnvironPort;
+	protected final static String LocalWebContextRoot = Local+"."+WebContextRoot;
+	protected final static String LocalWaitSeconds = Local+"."+WaitSeconds;
+	protected final static String LocalInstantiationMaxRetry = Local+"."+InstantiationMaxRetry;
 	
-	public final static String TestEnvironIP = Test+"."+EnvironIP;
-	public final static String TestEnvironPort = Test+"."+EnvironPort;
-	public final static String TestWebContextRoot = Test+"."+WebContextRoot;
-	public final static String TestWaitSeconds = Test+"."+WaitSeconds;
-	public final static String TestInstantiationMaxRetry = Test+"."+InstantiationMaxRetry;
+	protected final static String TestEnvironIP = Test+"."+EnvironIP;
+	protected final static String TestEnvironPort = Test+"."+EnvironPort;
+	protected final static String TestWebContextRoot = Test+"."+WebContextRoot;
+	protected final static String TestWaitSeconds = Test+"."+WaitSeconds;
+	protected final static String TestInstantiationMaxRetry = Test+"."+InstantiationMaxRetry;
 	
 	private final static String MilliSecondsBetweenKeyStrokes = "MilliSecondsBetweenKeyStrokes";
 	private final static String MilliSecondsBeforeClick = "MilliSecondsBeforeClick";
@@ -47,23 +53,23 @@ public class DomainConstantsProperties {
 	private final static String MilliSecondSimulateInteractivePause = "MilliSecondSimulateInteractivePause";
 	private final static String MilliSecondDurationOfSuccessMessage = "MilliSecondDurationOfSuccessMessage";
 	
-	public final static int defaultMilliSecondsBetweenKeyStrokes = 100;
-	public final static int defaultMilliSecondsBeforeClick = 100;
-	public final static int defaultMilliSecondsAfterClick = 100;
-	public final static int defaultMilliSecondSimulateInteractivePause = 2000;
-	public final static int defaultMilliSecondDurationOfSuccessMessage = 3500;
+	protected final static int defaultMilliSecondsBetweenKeyStrokes = 100;
+	protected final static int defaultMilliSecondsBeforeClick = 100;
+	protected final static int defaultMilliSecondsAfterClick = 100;
+	protected final static int defaultMilliSecondSimulateInteractivePause = 2000;
+	protected final static int defaultMilliSecondDurationOfSuccessMessage = 3500;
 	
-	public final static String TestSleepsMilliSecondsBetweenKeyStrokes = TestSleeps+"."+MilliSecondsBetweenKeyStrokes;
-	public final static String TestSleepsMilliSecondsBeforeClick = TestSleeps+"."+MilliSecondsBeforeClick;
-	public final static String TestSleepsMilliSecondsAfterClick = TestSleeps+"."+MilliSecondsAfterClick;
-	public final static String TestSleepsMilliSecondSimulateInteractivePause = TestSleeps+"."+MilliSecondSimulateInteractivePause;
-	public final static String TestSleepsMilliSecondDurationOfSuccessMessage = TestSleeps+"."+MilliSecondDurationOfSuccessMessage;
+	protected final static String TestSleepsMilliSecondsBetweenKeyStrokes = TestSleeps+"."+MilliSecondsBetweenKeyStrokes;
+	protected final static String TestSleepsMilliSecondsBeforeClick = TestSleeps+"."+MilliSecondsBeforeClick;
+	protected final static String TestSleepsMilliSecondsAfterClick = TestSleeps+"."+MilliSecondsAfterClick;
+	protected final static String TestSleepsMilliSecondSimulateInteractivePause = TestSleeps+"."+MilliSecondSimulateInteractivePause;
+	protected final static String TestSleepsMilliSecondDurationOfSuccessMessage = TestSleeps+"."+MilliSecondDurationOfSuccessMessage;
 	
 	private final static String SeleniumNode = "SeleniumNode";
-	public final static String SeleniumNodeCount = SeleniumNode+"Count";
-	public final static int defaultSeleniumNodeCount = 0;
-	public final static String SeleniumNodeLocal = SeleniumNode+"Local_";
-	public final static String SeleniumNodeRemoteURL = SeleniumNode+"RemoteURL_";
-	public final static String SeleniumNodeDriverType = SeleniumNode+"DriverType_";
+	protected final static String SeleniumNodeCount = SeleniumNode+"Count";
+	protected final static int defaultSeleniumNodeCount = 0;
+	protected final static String SeleniumNodeLocal = SeleniumNode+"Local_";
+	protected final static String SeleniumNodeRemoteURL = SeleniumNode+"RemoteURL_";
+	protected final static String SeleniumNodeDriverType = SeleniumNode+"DriverType_";
 	
 }

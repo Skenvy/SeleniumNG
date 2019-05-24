@@ -7,18 +7,26 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Properties;
 
-import org.openqa.selenium.remote.DesiredCapabilities;
-
 import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
 
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
-public class DomainConstants {
+/***
+ * Handles storing Domain Constants read in from an external configuration file.
+ * The config keys {@code <entry key="WebDriverSystemPaths.<Browser>"></entry>}
+ * generic on {@code <Browser>} are used by the NiceWebDriverFactory, while the
+ * "local" and "test" prefaced configuration values are utilised by some of the
+ * NiceWebDriver's more narrowly scoped "open web page" methods, which
+ * encapsulate the access of some site that is intended as the primary focus of
+ * the test suite that has subclassed the baseTest or invokes the
+ * NiceWebDriverFactory to substantiate tests in another testing framework.
+ */
+public final class DomainConstants {
 	
 	/***
 	 * Stores the properties read in from the config file.
 	 */
-	private final static Properties properties = new Properties();
+	private static final Properties properties = new Properties();
 	
 	/***
 	 * Maps a DriverExtension enum value K to the path Domain Constant required
@@ -111,33 +119,6 @@ public class DomainConstants {
 		}
 	}
 	
-	private DesiredCapabilities getDesiredCapabilitiesForDriverType(DriverType dt) {
-		switch(dt) {
-			case Chrome:
-				return DesiredCapabilities.chrome();
-			case Firefox:
-				return DesiredCapabilities.firefox();
-			case IE:
-				return DesiredCapabilities.internetExplorer();
-			case Edge:
-				return DesiredCapabilities.edge();
-			case Opera:
-				return DesiredCapabilities.opera();
-			case Safari:
-				return DesiredCapabilities.safari();
-			case iOS_iPhone:
-				return DesiredCapabilities.iphone();
-			case iOS_iPad:
-				return DesiredCapabilities.ipad();
-			case Android:
-				return DesiredCapabilities.android();
-			case HtmlUnit:
-				return DesiredCapabilities.htmlUnit();
-			default:
-				return null;
-		}
-	}
-	
 	/***
 	 * Returns static string components of urls.
 	 */
@@ -156,13 +137,9 @@ public class DomainConstants {
 		protected Local(int environPort, String webContextRoot, int waitSeconds, int instantiationMaxRetry){
 			this.environPort = environPort;
 			this.webContextRoot = webContextRoot;
-			if(waitSeconds <= 0) {
-				throw new ValueException("Local.WaitSeconds must be greater than 0");
-			}
+			validateIntIsGreaterThan(waitSeconds,DomainConstantsProperties.LocalWaitSeconds,0);
 			this.waitSeconds = waitSeconds;
-			if(instantiationMaxRetry <= 0) {
-				throw new ValueException("Local.InstantiationMaxRetry must be greater than 0");
-			}
+			validateIntIsGreaterThan(instantiationMaxRetry,DomainConstantsProperties.LocalInstantiationMaxRetry,0);
 			this.instantiationMaxRetry = instantiationMaxRetry;
 		}
 		
@@ -180,18 +157,18 @@ public class DomainConstants {
 			this.environIP = environIP;
 			this.environPort = environPort;
 			this.webContextRoot = webContextRoot;
-			if(waitSeconds <= 0) {
-				throw new ValueException("Test.WaitSeconds must be greater than 0");
-			}
+			validateIntIsGreaterThan(waitSeconds,DomainConstantsProperties.TestWaitSeconds,0);
 			this.waitSeconds = waitSeconds;
-			if(instantiationMaxRetry <= 0) {
-				throw new ValueException("Test.InstantiationMaxRetry must be greater than 0");
-			}
+			validateIntIsGreaterThan(instantiationMaxRetry,DomainConstantsProperties.TestInstantiationMaxRetry,0);
 			this.instantiationMaxRetry = instantiationMaxRetry;
 		}
 		
 	}
 	
+	/***
+	 * Values used to indicate millisecond thread sleeps that should be used to
+	 * mock a running test as a "demonstration" by faking a slower speed.
+	 */
 	public class TestSleeps {
 		
 		public final int MilliSecondsBetweenKeyStrokes;
@@ -201,25 +178,15 @@ public class DomainConstants {
 		public final int MilliSecondDurationOfSuccessMessage;
 		
 		protected TestSleeps(int milliSecondsBetweenKeyStrokes, int milliSecondsBeforeClick, int milliSecondsAfterClick, int milliSecondSimulateInteractivePause, int milliSecondDurationOfSuccessMessage) {
-			if(milliSecondsBetweenKeyStrokes <= 0) {
-				throw new ValueException("TestSleeps.MilliSecondsBetweenKeyStrokes must be greater than 0");
-			}
-			if(milliSecondsBeforeClick <= 0) {
-				throw new ValueException("TestSleeps.MilliSecondsBeforeClick must be greater than 0");
-			}
-			if(milliSecondsAfterClick <= 0) {
-				throw new ValueException("TestSleeps.MilliSecondsAfterClick must be greater than 0");
-			}
-			if(milliSecondSimulateInteractivePause <= 0) {
-				throw new ValueException("TestSleeps.MilliSecondSimulateInteractivePause must be greater than 0");
-			}
-			if(milliSecondDurationOfSuccessMessage <= 0) {
-				throw new ValueException("TestSleeps.MilliSecondDurationOfSuccessMessage must be greater than 0");
-			}
+			validateIntIsGreaterThan(milliSecondsBetweenKeyStrokes,DomainConstantsProperties.TestSleepsMilliSecondsBetweenKeyStrokes,0);
 			this.MilliSecondsBetweenKeyStrokes = milliSecondsBetweenKeyStrokes;
+			validateIntIsGreaterThan(milliSecondsBeforeClick,DomainConstantsProperties.TestSleepsMilliSecondsBeforeClick,0);
 			this.MilliSecondsBeforeClick = milliSecondsBeforeClick;
+			validateIntIsGreaterThan(milliSecondsAfterClick,DomainConstantsProperties.TestSleepsMilliSecondsAfterClick,0);
 			this.MilliSecondsAfterClick = milliSecondsAfterClick;
+			validateIntIsGreaterThan(milliSecondSimulateInteractivePause,DomainConstantsProperties.TestSleepsMilliSecondSimulateInteractivePause,0);
 			this.MilliSecondSimulateInteractivePause = milliSecondSimulateInteractivePause;
+			validateIntIsGreaterThan(milliSecondDurationOfSuccessMessage,DomainConstantsProperties.TestSleepsMilliSecondDurationOfSuccessMessage,0);
 			this.MilliSecondDurationOfSuccessMessage = milliSecondDurationOfSuccessMessage;
 		}
 		
@@ -229,6 +196,10 @@ public class DomainConstants {
 		return Integer.parseInt(properties.getProperty(searchString,String.valueOf(defaultInt)));
 	}
 	
+	/***
+	 * Handles the instantiation of several concurrently remote or consecutive
+	 * local instances of subclasses of the baseTest
+	 */
 	public static class SeleniumNode{
 		
 		public final boolean local;
@@ -241,6 +212,12 @@ public class DomainConstants {
 			this.dt = dt;
 		}
 		
+	}
+	
+	protected void validateIntIsGreaterThan(int field, String name, int greaterThanThis) {
+		if(field <= greaterThanThis) {
+			throw new ValueException(name+" must be greater than "+greaterThanThis);
+		}
 	}
 	
 }

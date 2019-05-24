@@ -278,7 +278,7 @@ public class NiceWebDriverFactory {
 	private NiceWebDriver getNiceWebDriverInstance(DriverType driverType, Object[] oArgs){
 		switch(driverType) {
 			case Chrome:
-				return new NiceChrome().UnderloadedNiceChromeDriverConstructor(oArgs);
+				return new NiceChrome().UnderloadedNiceWebDriverConstructor(oArgs);
 			case Firefox:
 				return null;
 			case IE:
@@ -307,6 +307,7 @@ public class NiceWebDriverFactory {
 	 * make a RemoteWebDriver
 	 * TODO - Deprecate and move into getRemoteCapability() overrides
 	 */
+	@SuppressWarnings({ "deprecation", "serial", "unused" })
 	private static final HashMap<DriverType,Capabilities> webDriverCapabilites = new HashMap<DriverType,Capabilities>(){{
 		put(DriverType.Chrome,DesiredCapabilities.chrome());
 		put(DriverType.Firefox,DesiredCapabilities.firefox());
@@ -330,10 +331,15 @@ public class NiceWebDriverFactory {
 	 * system path to the driver file for this driver type.
 	 * @param driverType
 	 * @throws FileNotFoundException
+	 * @throws NullPointerException
 	 */
-	private void setSystemPropertyWebDriver(DriverType driverType) throws FileNotFoundException {
-		String driverPath = domainConstants.webDriverSystemPaths.get(driverType);
-		setSystemPropertyWebDriver(driverType, driverPath);
+	private void setSystemPropertyWebDriver(DriverType driverType) throws FileNotFoundException, NullPointerException {
+		if(this.domainConstants != null) {
+			String driverPath = DomainConstants.webDriverSystemPaths.get(driverType);
+			setSystemPropertyWebDriver(driverType, driverPath);
+		} else {
+			throw new NullPointerException("The NiceWebDriverFactory has been accessed in a way that did not satisfactorially assign value to the static fields of the DomainConstants class");
+		}
 	}
 	
 	/***
@@ -343,8 +349,9 @@ public class NiceWebDriverFactory {
 	 * @param driverType
 	 * @param driverPath
 	 * @throws FileNotFoundException
+	 * @throws NullPointerException
 	 */
-	private void setSystemPropertyWebDriver(DriverType driverType, String driverPath) throws FileNotFoundException {
+	private void setSystemPropertyWebDriver(DriverType driverType, String driverPath) throws FileNotFoundException, NullPointerException {
 		if(webDriverSystemProperties.get(driverType) != null) {
 			if(!driversSet.contains(driverType)) {
 				if((new File(driverPath)).exists()) {

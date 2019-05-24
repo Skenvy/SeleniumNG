@@ -183,7 +183,7 @@ public abstract class NiceWebDriver {
 	 * @param oArgs
 	 * @return
 	 */
-	protected NiceWebDriver UnderloadedNiceChromeDriverConstructor(Object[] oArgs) {
+	protected NiceWebDriver UnderloadedNiceWebDriverConstructor(Object[] oArgs) {
 		//Wrap the top length at 2 and 1
 		if(oArgs.length < 3 && oArgs.length > 0){
 			//The first argument can be of three types
@@ -230,7 +230,7 @@ public abstract class NiceWebDriver {
 	 * @return
 	 */
 	public boolean isRunningRemotely() {
-		return (webDriver.getClass().getSimpleName().equals("RemoteWebDriver"));
+		return (webDriver instanceof RemoteWebDriver);
 	}
 	
 	//Opening a web page - Generic Web Pages (Non-local)
@@ -407,8 +407,6 @@ public abstract class NiceWebDriver {
 		this.openTestDefaultWithSubroot(null);
 	}
 	
-	//Demarcation point for reformatting
-	
 	//Get Element
 	
 	/***
@@ -494,6 +492,8 @@ public abstract class NiceWebDriver {
 	public WebElement clickOnAnchorHrefElementIfExists(String href, boolean visibleOnly) {
 		return clickANonNullWebElement(getWebElementByAnchorWithHrefIfExists(href,visibleOnly));
 	}
+	
+	//Demarcation point for reformatting
 	
 	//Send keys!
 	
