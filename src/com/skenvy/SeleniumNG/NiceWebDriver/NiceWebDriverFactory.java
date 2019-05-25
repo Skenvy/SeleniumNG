@@ -110,8 +110,19 @@ public class NiceWebDriverFactory {
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
+	/***
+	 * An instance of the DomainConstants class. All fields of the Domain
+	 * Constants class are accessed statically. This instance is simply used in
+	 * for nullity checking, to confirm that the class's constructor has been
+	 * called, thus appropriately assigning values to the static fields.
+	 */
 	private DomainConstants domainConstants;
 	
+	/***
+	 * Get the DomainConstants field associated with the
+	 * NiceWebDriverFactory singleton
+	 * @return
+	 */
 	public DomainConstants getDomainConstants() {
 		return this.domainConstants;
 	}
@@ -294,23 +305,23 @@ public class NiceWebDriverFactory {
 			case Chrome:
 				return new NiceChrome().UnderloadedNiceWebDriverConstructor(oArgs);
 			case Firefox:
-				return null;
+				return null; //TODO: Make Firefox subclass
 			case IE:
-				return null;
+				return null; //TODO: Make IE subclass
 			case Edge:
-				return null;
+				return null; //TODO: Make Edge subclass
 			case Opera:
-				return null;
+				return null; //TODO: Make Opera subclass
 			case Safari:
-				return null;
+				return null; //TODO: Make Safari subclass
 			case iOS_iPhone:
-				return null;
+				return null; //TODO: Make iOS_iPhone subclass
 			case iOS_iPad:
-				return null;
+				return null; //TODO: Make iOS_iPad subclass
 			case Android:
-				return null;
+				return null; //TODO: Make Android subclass
 			case HtmlUnit:
-				return null;
+				return null; //TODO: Make HtmlUnit subclass
 			default:
 				return null;
 		}
@@ -393,12 +404,11 @@ public class NiceWebDriverFactory {
 		put(DriverType.IE,"webdriver.ie.driver");
 		put(DriverType.Edge,"webdriver.edge.driver");
 		put(DriverType.Opera,"webdriver.opera.driver");
-		//TODO
-		put(DriverType.Safari,null);
-		put(DriverType.iOS_iPhone,null);
-		put(DriverType.iOS_iPad,null);
-		put(DriverType.Android,null);
-		put(DriverType.HtmlUnit,null);
+		put(DriverType.Safari,null); //TODO: Investigate the Safari driver's system prop path
+		put(DriverType.iOS_iPhone,null); //TODO: Investigate the iOS_iPhone driver's system prop path
+		put(DriverType.iOS_iPad,null); //TODO: Investigate the iOS_iPad driver's system prop path
+		put(DriverType.Android,null); //TODO: Investigate the Android driver's system prop path
+		put(DriverType.HtmlUnit,null); //TODO: Investigate the HtmlUnit driver's system prop path
 	}};
 	
 }

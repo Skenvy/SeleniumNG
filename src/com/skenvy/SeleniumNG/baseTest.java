@@ -30,6 +30,12 @@ import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriverFactory;
 
 public abstract class baseTest {
 	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * 
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	protected NiceWebDriver nwd;
 	private SeleniumNode seleniumNode = null;
 	private boolean testInDevelopment = false;
@@ -39,6 +45,14 @@ public abstract class baseTest {
 	public baseTest() {
 		nwdf = NiceWebDriverFactory.getFactory(getPathToDomainConstantsConfig());
 	}
+	
+	public abstract String getPathToDomainConstantsConfig();
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * The @Factory solution to instantiating multiple Selenium tests!
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	/***
 	 * A non-static Factory method that will create multiple instances of any
@@ -69,7 +83,7 @@ public abstract class baseTest {
         return result;
     }
 	
-	public abstract String getPathToDomainConstantsConfig();
+	
 	
 	public baseTest newSubClassInstance() throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// Get the Class object, cast to an extension of this class, from the class name of the object calling this method
@@ -91,7 +105,11 @@ public abstract class baseTest {
 		return newObj;
 	}
 	
-	
+///////////////////////////////////////////////////////////////////////////////
+/* 
+ * 
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	//@BeforeMethod < not super'd
 	//This has been removed from here so as to implement a default factory
@@ -121,6 +139,12 @@ public abstract class baseTest {
 		nwd.openTestDefaultAtBase();
 	}
 	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * 
+ */
+///////////////////////////////////////////////////////////////////////////////
+	
 	public void declareThisTestAsCurrentlyBeingUnderDevelopment() {
 		this.testInDevelopment = true;
 	}
@@ -144,6 +168,12 @@ public abstract class baseTest {
 	/*
 	 * Clicks and keys
 	 */
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * 
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	private void sleepBeforeClicking() throws InterruptedException {
 		if(this.testIsBeingDemonstrated) {
@@ -171,6 +201,12 @@ public abstract class baseTest {
 		nwdf.getDomainConstants();
 		Thread.sleep(DomainConstants.testSleeps.MilliSecondDurationOfSuccessMessage);
 	}
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * 
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	protected WebElement clickOnCSSElementIfExists(String cssSelector) throws InterruptedException {
 		sleepBeforeClicking();
@@ -207,6 +243,12 @@ public abstract class baseTest {
 		return we;
 	}
 	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * 
+ */
+///////////////////////////////////////////////////////////////////////////////
+	
 	protected void sendKeysToAWebElement(WebElement we, String keyStrokes) throws InterruptedException {
 		for(char keyStroke : keyStrokes.toCharArray()) {
 			nwd.sendKeysToAWebElement(we,keyStroke+"");
@@ -230,6 +272,11 @@ public abstract class baseTest {
 	/*
 	 * Get hyperlink collections
 	 */
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * 
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	protected void AssertSubrootDoesNotLeadTo404(String subroot) {
 		nwd.openTestDefaultWithSubroot(subroot);
@@ -286,6 +333,11 @@ public abstract class baseTest {
 	/*
 	 * Data providers
 	 */
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * 
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	protected static Object[][] wrapStringCollectionToDataProvider(Collection<String> c) {
 		Object[][] objArr = new Object[c.size()][1];

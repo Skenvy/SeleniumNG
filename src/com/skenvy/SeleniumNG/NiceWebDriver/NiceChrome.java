@@ -11,8 +11,12 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 public class NiceChrome extends NiceWebDriver {
 
-	//Super every constructor
-	
+///////////////////////////////////////////////////////////////////////////////
+/* 
+ * Sub every constructor and simply invoke the super
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	protected NiceChrome() {
 		super();
 	}
@@ -41,8 +45,12 @@ public class NiceChrome extends NiceWebDriver {
 		super(remoteAddress, waitSeconds);
 	}
 	
-	//Overrides - InvokeContsructorWithArguments
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Overrides - InvokeContsructorWithArguments
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	@Override
 	protected NiceWebDriver InvokeContsructorWithArguments(boolean localInstance) {
 		return new NiceChrome(localInstance);
@@ -73,8 +81,12 @@ public class NiceChrome extends NiceWebDriver {
 		return new NiceChrome(remoteAddress,waitSeconds);
 	}
 
-	//Overrides - Chrome
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Overrides - Chrome Specific
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	@Override
 	protected MutableCapabilities makeBrowserOptions(String optionArgs) {
 		ChromeOptions options = new ChromeOptions();
