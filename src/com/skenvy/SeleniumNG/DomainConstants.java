@@ -12,7 +12,7 @@ import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
 /***
- * Handles storing Domain Constants read in from an external configuration file.
+ * Handles storing Domain Constants read from an external configuration file.
  * The config keys {@code <entry key="WebDriverSystemPaths.<Browser>"></entry>}
  * generic on {@code <Browser>} are used by the NiceWebDriverFactory, while the
  * "local" and "test" prefaced configuration values are utilised by some of the
@@ -22,6 +22,12 @@ import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
  * NiceWebDriverFactory to substantiate tests in another testing framework.
  */
 public final class DomainConstants {
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Static Vars
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	/***
 	 * Stores the properties read in from the config file.
@@ -44,6 +50,11 @@ public final class DomainConstants {
 	
 	public static SeleniumNode[] seleniumNodes = null;
 	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Invoke the constructor to overwrite the static fields
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	/***
 	 * Construct the properties and assign the values to the dictionaries
@@ -61,8 +72,13 @@ public final class DomainConstants {
 		assignSeleniumNodes();
 	}
 	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Assign the vars
+ */
+///////////////////////////////////////////////////////////////////////////////
+	
 	private void loadPropertiesFromXMLConfigFile(String configFilePath) throws IOException{
-		//Read in the properties then close the file
 		FileInputStream in = new FileInputStream(configFilePath);
 		properties.loadFromXML(in);
 		in.close();
@@ -119,21 +135,35 @@ public final class DomainConstants {
 		}
 	}
 	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Public inner classes
+ */
+///////////////////////////////////////////////////////////////////////////////
+	
 	/***
-	 * Returns static string components of urls.
+	 * Returns static string components of urls; for destringification
 	 */
-	public class UrlConstants {
+	public static class UrlConstants {
 		public final static String HTTP = "http";
 		public final static String HTTPS = "https";
 	}
 	
-	public class Local {
+	public static class Local {
 		
 		public final int environPort;
 		public final String webContextRoot;
 		public final int waitSeconds;
 		public final int instantiationMaxRetry;
 		
+		/***
+		 * Constructs a Local object, accessed through the DomainConstants
+		 * static member "local"
+		 * @param environPort
+		 * @param webContextRoot
+		 * @param waitSeconds
+		 * @param instantiationMaxRetry
+		 */
 		protected Local(int environPort, String webContextRoot, int waitSeconds, int instantiationMaxRetry){
 			this.environPort = environPort;
 			this.webContextRoot = webContextRoot;
@@ -145,7 +175,7 @@ public final class DomainConstants {
 		
 	}
 	
-	public class Test {
+	public static class Test {
 		
 		public final String environIP;
 		public final int environPort;
@@ -153,6 +183,15 @@ public final class DomainConstants {
 		public final int waitSeconds;
 		public final int instantiationMaxRetry;
 		
+		/***
+		 * Constructs a Test object, accessed through the DomainConstants
+		 * static member "test"
+		 * @param environIP
+		 * @param environPort
+		 * @param webContextRoot
+		 * @param waitSeconds
+		 * @param instantiationMaxRetry
+		 */
 		protected Test(String environIP, int environPort, String webContextRoot, int waitSeconds, int instantiationMaxRetry) {
 			this.environIP = environIP;
 			this.environPort = environPort;
@@ -169,14 +208,38 @@ public final class DomainConstants {
 	 * Values used to indicate millisecond thread sleeps that should be used to
 	 * mock a running test as a "demonstration" by faking a slower speed.
 	 */
-	public class TestSleeps {
-		
+	protected static class TestSleeps {
+
+		/***
+		 * How many milliseconds to pause between keystrokes
+		 */
 		public final int MilliSecondsBetweenKeyStrokes;
+		/***
+		 * How many milliseconds to pause before a mouse click
+		 */
 		public final int MilliSecondsBeforeClick;
+		/***
+		 * How many milliseconds to pause after a mouse click
+		 */
 		public final int MilliSecondsAfterClick;
+		/***
+		 * How many milliseconds to pause to simulate a web page interaction
+		 */
 		public final int MilliSecondSimulateInteractivePause;
+		/***
+		 * How many milliseconds to pause after a success message
+		 */
 		public final int MilliSecondDurationOfSuccessMessage;
 		
+		/***
+		 * Constructs a TestSleeps object, accessed through the DomainConstants
+		 * static member "testSleeps"
+		 * @param milliSecondsBetweenKeyStrokes
+		 * @param milliSecondsBeforeClick
+		 * @param milliSecondsAfterClick
+		 * @param milliSecondSimulateInteractivePause
+		 * @param milliSecondDurationOfSuccessMessage
+		 */
 		protected TestSleeps(int milliSecondsBetweenKeyStrokes, int milliSecondsBeforeClick, int milliSecondsAfterClick, int milliSecondSimulateInteractivePause, int milliSecondDurationOfSuccessMessage) {
 			validateIntIsGreaterThan(milliSecondsBetweenKeyStrokes,DomainConstantsProperties.TestSleepsMilliSecondsBetweenKeyStrokes,0);
 			this.MilliSecondsBetweenKeyStrokes = milliSecondsBetweenKeyStrokes;
@@ -192,20 +255,33 @@ public final class DomainConstants {
 		
 	}
 	
-	private int getPropertyInteger(String searchString, int defaultInt) {
-		return Integer.parseInt(properties.getProperty(searchString,String.valueOf(defaultInt)));
-	}
-	
 	/***
 	 * Handles the instantiation of several concurrently remote or consecutive
 	 * local instances of subclasses of the baseTest
 	 */
-	public static class SeleniumNode{
+	protected static class SeleniumNode{
 		
+		/***
+		 * Is the SeleniumNode a local instance or a remote connection?
+		 */
 		public final boolean local;
+		/***
+		 * If the SeleniumNode is a remote connection, what is the node's URL?
+		 */
 		public final URL nodeUrl;
+		/***
+		 * What is the DriverType?
+		 */
 		public final DriverType dt;
 		
+		/***
+		 * Constructs a SeleniumNode to match configuration input. Is it local
+		 * or remote? If it's remote, what is the node url? In either case,
+		 * what is the DriverType?
+		 * @param local
+		 * @param nodeUrl
+		 * @param dt
+		 */
 		public SeleniumNode(boolean local, URL nodeUrl, DriverType dt) {
 			this.local = local;
 			this.nodeUrl = nodeUrl;
@@ -214,7 +290,31 @@ public final class DomainConstants {
 		
 	}
 	
-	protected void validateIntIsGreaterThan(int field, String name, int greaterThanThis) {
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Minifying helpers
+ */
+///////////////////////////////////////////////////////////////////////////////
+	
+	/***
+	 * Searches for a string property in the config file and integer casts its
+	 * value, or assigns a default integer
+	 * @param searchString
+	 * @param defaultInt
+	 * @return
+	 */
+	private int getPropertyInteger(String searchString, int defaultInt) {
+		return Integer.parseInt(properties.getProperty(searchString,String.valueOf(defaultInt)));
+	}
+	
+	/***
+	 * Throw a ValueException if a field is less than some value it must be
+	 * validated as being greater than
+	 * @param field
+	 * @param name
+	 * @param greaterThanThis
+	 */
+	protected static void validateIntIsGreaterThan(int field, String name, int greaterThanThis) {
 		if(field <= greaterThanThis) {
 			throw new ValueException(name+" must be greater than "+greaterThanThis);
 		}

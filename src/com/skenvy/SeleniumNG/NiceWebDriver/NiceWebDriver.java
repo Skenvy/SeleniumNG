@@ -24,6 +24,12 @@ import java.net.UnknownHostException;
 
 public abstract class NiceWebDriver {
 	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * WebDriver, Wait, and JSExe
+ */
+///////////////////////////////////////////////////////////////////////////////
+	
 	/***
 	 * Instance of WebDriver, instantiated as a ChromeDriver
 	 */
@@ -44,7 +50,11 @@ public abstract class NiceWebDriver {
 	 */
 	private String localIP = null;
 	
-	// Constructors
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Constructors
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	/***
 	 * An argumentless instance for the purposes of calling the UnderloadedNiceChromeDriverConstructor
@@ -131,7 +141,11 @@ public abstract class NiceWebDriver {
 		this.jsExecutor = (JavascriptExecutor)this.webDriver;
 	}
 	
-	//Abstracts
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Abstracts
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	/***
 	 * Returns a subclass of MutableCapabilities according to the subclass of this NiceWebDriver
@@ -162,7 +176,12 @@ public abstract class NiceWebDriver {
 	 */
 	protected abstract Capabilities getRemoteCapability();
 	
-	//Abstract wrappers on the constructors, to return the return of the constructors
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Abstract wrappers on the constructors
+ * to return the return of the constructors 
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	protected abstract NiceWebDriver InvokeContsructorWithArguments(boolean localInstance);
 	
@@ -176,8 +195,12 @@ public abstract class NiceWebDriver {
 	
 	protected abstract NiceWebDriver InvokeContsructorWithArguments(URL remoteAddress, int waitSeconds);
 	
-	//Underloaded Constructor to decouple the switches in the factory
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Underloaded Constructor to decouple the switches in the factory
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Takes an object array and parses them into suitable arrangements for the different constructors
 	 * @param oArgs
@@ -216,8 +239,12 @@ public abstract class NiceWebDriver {
 		return null;
 	}
 	
-	//Niceties
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Niceties
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Close the web driver
 	 */
@@ -233,8 +260,12 @@ public abstract class NiceWebDriver {
 		return (webDriver instanceof RemoteWebDriver);
 	}
 	
-	//Opening a web page - Generic Web Pages (Non-local)
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Opening a web page - Generic Web Pages (Non-local)
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Open a webpage!
 	 * @param url
@@ -338,8 +369,12 @@ public abstract class NiceWebDriver {
 		this.openPageOnHostPortContextRoot(DomainConstants.UrlConstants.HTTPS,null,host,port,contextRoot,subrootQuery);
 	}
 	
-	//Opening a web page - Local Web Pages - Any local page
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Opening a web page - Local Web Pages - Any local page
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Will either initialise or return the initialised local IP
 	 * @return
@@ -371,8 +406,12 @@ public abstract class NiceWebDriver {
 		this.openLocalHTTPWebPageWithSubroot(contextRoot,null);
 	}
 	
-	//Opening a web page - Local Web Pages - Default Local Page
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Opening a web page - Local Web Pages - Default Local Page
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Open a web resource served from the local machine over HTTP on a default "environment port" and a default "web context root" with a subroot query
 	 * @param subrootQuery
@@ -390,8 +429,12 @@ public abstract class NiceWebDriver {
 		this.openLocalHTTPDefaultWebContextRootWithSubroot(null);
 	}
 	
-	//Opening a web page - Local Web Pages - Default Test Page
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Opening a web page - Local Web Pages - Default Test Page
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Opens a web resource defined by the "test default" parameters which specify an environ IP/Host, port, and WebContextRoot, with a subroot query
 	 * @param subrootQuery
@@ -407,8 +450,12 @@ public abstract class NiceWebDriver {
 		this.openTestDefaultWithSubroot(null);
 	}
 	
-	//Get Element
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Get Element
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	/***
 	 * Returns a WebElement by using "BY", if it exists, after waiting for it's presence
 	 * @param cssSelectorQuery
@@ -460,8 +507,12 @@ public abstract class NiceWebDriver {
 		return getWebElementByCSSIfExists(AnchorQueryStringForHREF(href, visibleOnly));
 	}
 	
-	//Click on a web element
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Click on a web element
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	/*
 	 * Click !
 	 */
@@ -495,8 +546,12 @@ public abstract class NiceWebDriver {
 	
 	//Demarcation point for reformatting
 	
-	//Send keys!
-	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Send keys!
+ */
+///////////////////////////////////////////////////////////////////////////////
+
 	public void sendKeysToAWebElement(WebElement we, String keyStrokes) {
 		we.sendKeys(keyStrokes);
 	}
