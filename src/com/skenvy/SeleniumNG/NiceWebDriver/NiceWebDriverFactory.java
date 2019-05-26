@@ -99,11 +99,6 @@ public class NiceWebDriverFactory {
 		return instance;
 	}
 	
-	//TODO : Remove before release
-	public static void main(String[] args){
-		System.out.println("哇");
-	}
-	
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Must include domain constants

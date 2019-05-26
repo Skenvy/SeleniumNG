@@ -235,7 +235,8 @@ public abstract class baseTest {
 	 */
 	@BeforeMethod
 	public void beforeMethod() {
-		nwd.openTestDefaultAtBase();
+		//TODO Make the protocol a configurable argument
+		nwd.openTestDefaultWithHTTPSAtBase();
 	}
 	
 	/***
@@ -620,7 +621,7 @@ public abstract class baseTest {
 	 * @param subroot
 	 */
 	public void AssertSubrootDoesNotLeadTo404(String subroot) {
-		nwd.openTestDefaultWithSubroot(subroot);
+		nwd.openTestDefaultWithHTTPSAndSubroot(subroot);
 		Assert.assertFalse(nwd.isWebPage404());
 	}
 	

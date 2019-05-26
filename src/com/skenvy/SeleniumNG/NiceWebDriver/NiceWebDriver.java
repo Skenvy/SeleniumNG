@@ -501,12 +501,18 @@ public abstract class NiceWebDriver {
 	 * @return
 	 */
 	private String castToUrl(String protocol, String userinfo, String host, int port, String contextRoot, String subrootQuery) {
-		if(contextRoot == null) {
-			return castToUrlAuthority(protocol,userinfo,host,port);
-		} else if(subrootQuery == null) {
-			return (castToUrlAuthority(protocol,userinfo,host,port)+contextRoot);
+		if(contextRoot == null || contextRoot == "") {
+			if(subrootQuery == null || subrootQuery == "") {
+				return castToUrlAuthority(protocol,userinfo,host,port);
+			} else {
+				return (castToUrlAuthority(protocol,userinfo,host,port)+subrootQuery);
+			}
 		} else {
-			return (castToUrlAuthority(protocol,userinfo,host,port)+contextRoot+"/"+subrootQuery);
+			if(subrootQuery == null || subrootQuery == "") {
+				return (castToUrlAuthority(protocol,userinfo,host,port)+contextRoot);
+			} else {
+				return (castToUrlAuthority(protocol,userinfo,host,port)+contextRoot+"/"+subrootQuery);
+			}
 		}
 	}
 
@@ -676,16 +682,34 @@ public abstract class NiceWebDriver {
 	 * with a subroot query
 	 * @param subrootQuery
 	 */
-	public void openTestDefaultWithSubroot(String subrootQuery) {
+	public void openTestDefaultWithHTTPAndSubroot(String subrootQuery) {
 		this.openHTTPOnHostPortContextRoot(DomainConstants.test.environIP,DomainConstants.test.environPort,DomainConstants.test.webContextRoot,subrootQuery);
+	}
+	
+	/***
+	 * Opens a web resource defined by the "test default" parameters which 
+	 * specify an environ IP/Host, port, and WebContextRoot, 
+	 * with a subroot query
+	 * @param subrootQuery
+	 */
+	public void openTestDefaultWithHTTPSAndSubroot(String subrootQuery) {
+		this.openHTTPSOnHostPortContextRoot(DomainConstants.test.environIP,DomainConstants.test.environPort,DomainConstants.test.webContextRoot,subrootQuery);
 	}
 	
 	/***
 	 * Opens a web resource defined by the "test default" parameters which 
 	 * specify an environ IP/Host, port, and WebContextRoot
 	 */
-	public void openTestDefaultAtBase() {
-		this.openTestDefaultWithSubroot(null);
+	public void openTestDefaultWithHTTPAtBase() {
+		this.openTestDefaultWithHTTPAndSubroot(null);
+	}
+	
+	/***
+	 * Opens a web resource defined by the "test default" parameters which 
+	 * specify an environ IP/Host, port, and WebContextRoot
+	 */
+	public void openTestDefaultWithHTTPSAtBase() {
+		this.openTestDefaultWithHTTPSAndSubroot(null);
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
