@@ -1,30 +1,25 @@
 package com.skenvy.SeleniumNG;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Scanner;
 
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterTest;
+//import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.DataProvider;
+//import org.testng.annotations.BeforeTest;
+//import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 
 import com.skenvy.SeleniumNG.DomainConstants.SeleniumNode;
 import com.skenvy.SeleniumNG.NiceWebDriver.DriverType;
-import com.skenvy.SeleniumNG.NiceWebDriver.NiceChrome;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriver;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriverFactory;
 
@@ -153,6 +148,7 @@ public abstract class baseTest {
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
 	 */
+	@SuppressWarnings("unchecked")
 	public baseTest newSubClassInstance() throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// Get the Class object, cast to an extension of this class, from the class name of the object calling this method
 		Class<? extends baseTest> thisClass = (Class<? extends baseTest>) Class.forName(this.getClass().getName());
@@ -244,7 +240,7 @@ public abstract class baseTest {
 	
 	/***
 	 * Subclasses of the base test can utilise this to have their
-	 * {@code @DataProvider} return an Object[][] type from a
+	 * {@code @DataProvider} return an {@code Object[][]} type from a
 	 * collection of Strings
 	 * @param c
 	 * @return
@@ -259,102 +255,179 @@ public abstract class baseTest {
 		return objArr;
 	}
 	
-	//TODO Demarcation point
-	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * 
+ * Functionality that allows for a test to self declare that it is "under
+ * development" for the purposes of debugging the browser if a test throws an
+ * exception, and to declare a test as being "demonstrated" which will prompt
+ * periodic sleeps for each action that should be slowed down for demonstration
+ * purposes!
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
+	/***
+	 * Call this at the start of an {@code @Test} annotated method to have it
+	 * not shut the browser when the test ends, such that if the test ends with
+	 * an exception, the browser will remain open for debugging
+	 */
 	public void declareThisTestAsCurrentlyBeingUnderDevelopment() {
 		this.testInDevelopment = true;
 	}
-	
+
+	/***
+	 * Call this at the start of an {@code @Test} annotated method to have it
+	 * slow down actions such as clicking and typing keys.
+	 */
 	public void declareThisTestAsCurrentlyBeingDemonstrated() {
 		this.testIsBeingDemonstrated = true;
 	}
-	
+
+	/***
+	 * Call this during a test to have the browser temporarily pause, until at
+	 * least either the local timeframe has elapsed or the remote instance is
+	 * triggered again by pressing enter on the machine running the test, as
+	 * an enhanced "demonstration" which requires explaining static views.
+	 * @throws InterruptedException
+	 */
 	public void promptEnterKey() throws InterruptedException{
 		if(this.testIsBeingDemonstrated) {
 			if(nwd.isRunningRemotely()) {
 				System.out.println("Press \"ENTER\" to continue...");
 				Scanner scanner = new Scanner(System.in);
 				scanner.nextLine();
+				scanner.close();
 			} else {
-				Thread.sleep(DomainConstants.testSleeps.MilliSecondSimulateInteractivePause);
+				sleepForTheDurationOfAPrompt();
 			}
 		}
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Clicks and keys
+ * Sleep, if the @Test is currently being demonstrated
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
+	/***
+	 * Sleep before a click
+	 * @throws InterruptedException
+	 */
 	private void sleepBeforeClicking() throws InterruptedException {
 		if(this.testIsBeingDemonstrated) {
 			Thread.sleep(DomainConstants.testSleeps.MilliSecondsBeforeClick);
 		}
 	}
-	
+
+	/***
+	 * Sleep after a click
+	 * @throws InterruptedException
+	 */
 	private void sleepAfterClicking() throws InterruptedException {
 		if(this.testIsBeingDemonstrated) {
 			Thread.sleep(DomainConstants.testSleeps.MilliSecondsAfterClick);
 		}
 	}
-	
+
+	/***
+	 * Sleep between keystrokes
+	 * @throws InterruptedException
+	 */
 	private void sleepBetweenKeyStrokes() throws InterruptedException {
 		if(this.testIsBeingDemonstrated) {
 			Thread.sleep(DomainConstants.testSleeps.MilliSecondsBetweenKeyStrokes);
 		}
 	}
-	
-	protected void sleepForTheDurationOfAPrompt() throws InterruptedException {
+
+	/***
+	 * Sleep for the duration of a prompted pause
+	 * @throws InterruptedException
+	 */
+	private void sleepForTheDurationOfAPrompt() throws InterruptedException {
 		Thread.sleep(DomainConstants.testSleeps.MilliSecondSimulateInteractivePause);
 	}
-	
-	protected void sleepForTheDurationOfASuccessMessagePrompt() throws InterruptedException {
+
+	/***
+	 * Call this in {@code @Test} annotated methods to sleep for the duration a
+	 * success message will be displayed for by the page, as this may block the
+	 * WebDriver from immediately following a success message
+	 * @throws InterruptedException
+	 */
+	public void sleepForTheDurationOfASuccessMessagePrompt() throws InterruptedException {
 		nwdf.getDomainConstants();
 		Thread.sleep(DomainConstants.testSleeps.MilliSecondDurationOfSuccessMessage);
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * 
+ * Click on things
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
-	protected WebElement clickOnCSSElementIfExists(String cssSelector) throws InterruptedException {
+	/***
+	 * Clicks on a WebElement found using a CSS Selector, wrapped with 
+	 * demonstration sleeps.
+	 * @param cssSelector
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement clickOnCSSElementIfExists(String cssSelector) throws InterruptedException {
 		sleepBeforeClicking();
 		WebElement we = nwd.clickOnCSSElementIfExists(cssSelector);
 		sleepAfterClicking();
 		return we;
 	}
-	
-	protected WebElement clickOnXPathElementIfExists(String xpath) throws InterruptedException {
+
+	/***
+	 * Clicks on a WebElement found using an XPath, wrapped with 
+	 * demonstration sleeps.
+	 * @param xpath
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement clickOnXPathElementIfExists(String xpath) throws InterruptedException {
 		sleepBeforeClicking();
 		WebElement we = nwd.clickOnXPathElementIfExists(xpath);
 		sleepAfterClicking();
 		return we;
 	}
-	
-	protected WebElement clickOnLinkTextElementIfExists(String linkText) throws InterruptedException {
+
+	/***
+	 * Clicks on a WebElement found using a link text, wrapped with 
+	 * demonstration sleeps.
+	 * @param linkText
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement clickOnLinkTextElementIfExists(String linkText) throws InterruptedException {
 		sleepBeforeClicking();
 		WebElement we = nwd.clickOnLinkTextElementIfExists(linkText);
 		sleepAfterClicking();
 		return we;
 	}
-	
-	protected WebElement clickOnIdElementIfExists(String id) throws InterruptedException {
+
+	/***
+	 * Clicks on a WebElement found using an ID, wrapped with 
+	 * demonstration sleeps.
+	 * @param id
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement clickOnIdElementIfExists(String id) throws InterruptedException {
 		sleepBeforeClicking();
 		WebElement we = nwd.clickOnIdElementIfExists(id);
 		sleepAfterClicking();
 		return we;
 	}
-	
-	protected WebElement clickOnAnchorHrefElementIfExists(String href, boolean visibleOnly) throws InterruptedException {
+
+	/***
+	 * Clicks on a WebElement found using an href, wrapped with 
+	 * demonstration sleeps.
+	 * @param href
+	 * @param visibleOnly
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement clickOnAnchorHrefElementIfExists(String href, boolean visibleOnly) throws InterruptedException {
 		sleepBeforeClicking();
 		WebElement we = nwd.clickOnAnchorHrefElementIfExists(href,visibleOnly);
 		sleepAfterClicking();
@@ -363,84 +436,266 @@ public abstract class baseTest {
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * 
+ * Send keys! : Strings
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
-	protected void sendKeysToAWebElement(WebElement we, String keyStrokes) throws InterruptedException {
+	/***
+	 * Sends keys to a WebElement found using a CSS Selector, wrapped with 
+	 * demonstration sleeps.
+	 * @param cssSelector
+	 * @return
+	 * @throws InterruptedException 
+	 */
+	public WebElement sendKeysToCSSElementIfExists(String cssSelector, String keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToCSSElementIfExists(cssSelector,"");
 		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToAWebElement(we,keyStroke+"");
+			nwd.sendKeysToCSSElementIfExists(cssSelector,keyStroke+"");
 			sleepBetweenKeyStrokes();
 		}
+		return we;
 	}
-	
-	protected void sendKeysToAWebElement(WebElement we, Keys[] keyStrokes) throws InterruptedException {
-		for(Keys keyStroke : keyStrokes) {
-			we.sendKeys(keyStroke);
+
+	/***
+	 * Sends keys to a WebElement found using an XPath, wrapped with 
+	 * demonstration sleeps.
+	 * @param xpath
+	 * @return
+	 * @throws InterruptedException 
+	 */
+	public WebElement sendKeysToXPathElementIfExists(String xpath, String keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToXPathElementIfExists(xpath,"");
+		for(char keyStroke : keyStrokes.toCharArray()) {
+			nwd.sendKeysToXPathElementIfExists(xpath,keyStroke+"");
 			sleepBetweenKeyStrokes();
 		}
+		return we;
 	}
-	
-	protected void backspaceKeysFromAWebElement(WebElement we, int amountOfBackspaces) throws InterruptedException {
-		for(int k = 0; k < amountOfBackspaces; k++) {
-			sendKeysToAWebElement(we,"\u0008");
+
+	/***
+	 * Sends keys to a WebElement found using a link text, wrapped with 
+	 * demonstration sleeps.
+	 * @param linkText
+	 * @return
+	 * @throws InterruptedException 
+	 */
+	public WebElement sendKeysToLinkTextElementIfExists(String linkText, String keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToLinkTextElementIfExists(linkText,"");
+		for(char keyStroke : keyStrokes.toCharArray()) {
+			nwd.sendKeysToLinkTextElementIfExists(linkText,keyStroke+"");
+			sleepBetweenKeyStrokes();
 		}
+		return we;
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an ID, wrapped with 
+	 * demonstration sleeps.
+	 * @param id
+	 * @return
+	 * @throws InterruptedException 
+	 */
+	public WebElement sendKeysToIdElementIfExists(String id, String keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToIdElementIfExists(id,"");
+		for(char keyStroke : keyStrokes.toCharArray()) {
+			nwd.sendKeysToIdElementIfExists(id,keyStroke+"");
+			sleepBetweenKeyStrokes();
+		}
+		return we;
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an href, wrapped with 
+	 * demonstration sleeps.
+	 * @param href
+	 * @param visibleOnly
+	 * @return
+	 * @throws InterruptedException 
+	 */
+	public WebElement sendKeysToAnchorHrefElementIfExists(String href, String keyStrokes, boolean visibleOnly) throws InterruptedException {
+		WebElement we = nwd.sendKeysToAnchorHrefElementIfExists(href,"",visibleOnly);
+		for(char keyStroke : keyStrokes.toCharArray()) {
+			nwd.sendKeysToAnchorHrefElementIfExists(href,keyStroke+"",visibleOnly);
+			sleepBetweenKeyStrokes();
+		}
+		return we;
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Get hyperlink collections
+ * Send keys! : Strings
+ */
+///////////////////////////////////////////////////////////////////////////////
+
+	/***
+	 * Sends keys to a WebElement found using a CSS Selector, wrapped with
+	 * demonstration sleeps.
+	 * @param cssSelector
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysToCSSElementIfExists(String cssSelector, Keys[] keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToCSSElementIfExists(cssSelector, "");
+		for (Keys keyStroke : keyStrokes) {
+			nwd.sendKeysToCSSElementIfExists(cssSelector, new Keys[]{keyStroke});
+			sleepBetweenKeyStrokes();
+		}
+		return we;
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an XPath, wrapped with demonstration
+	 * sleeps.
+	 * @param xpath
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysToXPathElementIfExists(String xpath, Keys[] keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToXPathElementIfExists(xpath, "");
+		for (Keys keyStroke : keyStrokes) {
+			nwd.sendKeysToXPathElementIfExists(xpath, new Keys[]{keyStroke});
+			sleepBetweenKeyStrokes();
+		}
+		return we;
+	}
+
+	/***
+	 * Sends keys to a WebElement found using a link text, wrapped with
+	 * demonstration sleeps.
+	 * @param linkText
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysToLinkTextElementIfExists(String linkText, Keys[] keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToLinkTextElementIfExists(linkText, "");
+		for (Keys keyStroke : keyStrokes) {
+			nwd.sendKeysToLinkTextElementIfExists(linkText, new Keys[]{keyStroke});
+			sleepBetweenKeyStrokes();
+		}
+		return we;
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an ID, wrapped with demonstration
+	 * sleeps.
+	 * @param id
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysToIdElementIfExists(String id, Keys[] keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToIdElementIfExists(id, "");
+		for (Keys keyStroke : keyStrokes) {
+			nwd.sendKeysToIdElementIfExists(id, new Keys[]{keyStroke});
+			sleepBetweenKeyStrokes();
+		}
+		return we;
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an href, wrapped with demonstration
+	 * sleeps.
+	 * @param href
+	 * @param visibleOnly
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysToAnchorHrefElementIfExists(String href, Keys[] keyStrokes, boolean visibleOnly) throws InterruptedException {
+		WebElement we = nwd.sendKeysToAnchorHrefElementIfExists(href, "", visibleOnly);
+		for (Keys keyStroke : keyStrokes) {
+			nwd.sendKeysToAnchorHrefElementIfExists(href, new Keys[]{keyStroke}, visibleOnly);
+			sleepBetweenKeyStrokes();
+		}
+		return we;
+	}
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Assertions that may be relevant in locating common page elements
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
-	protected void AssertSubrootDoesNotLeadTo404(String subroot) {
+	/***
+	 * Assert that loading the default web page under test with some subroot
+	 * does not result in an Http404
+	 * @param subroot
+	 */
+	public void AssertSubrootDoesNotLeadTo404(String subroot) {
 		nwd.openTestDefaultWithSubroot(subroot);
 		Assert.assertFalse(nwd.isWebPage404());
 	}
 	
 	/*
-	 * Assert for Href
+	 * Assert for Href : does it exist or is it visible?
 	 */
-	
-	protected void AssertHrefExists(String methodName, String href) {
+
+	/***
+	 * Asserts that a href does exist
+	 * @param methodName
+	 * @param href
+	 */
+	public void AssertHrefExists(String methodName, String href) {
 		System.out.println(methodName+": expect next web element locator to pass");
 		Assert.assertTrue(nwd.AnchorExistsWithHREF(href, false));
 	}
-	
-	protected void AssertHrefNotVisible(String methodName, String href) {
+
+	/***
+	 * Assert that the href is not visible, whether or not it exists
+	 * @param methodName
+	 * @param href
+	 */
+	public void AssertHrefNotVisible(String methodName, String href) {
 		System.out.println(methodName+": expect next web element locator to fail");
 		Assert.assertFalse(nwd.AnchorExistsWithHREF(href, true));
 	}
-	
-	protected void AssertHrefExistsAndIsVisible(String methodName, String href) {
+
+	/***
+	 * Asser that the href exists and is visible
+	 * @param methodName
+	 * @param href
+	 */
+	public void AssertHrefExistsAndIsVisible(String methodName, String href) {
 		System.out.println(methodName+": expect next web element locator to pass");
 		Assert.assertTrue(nwd.AnchorExistsWithHREF(href, true));
 	}
-	
-	protected void AssertHrefExistsButIsHidden(String methodName, String href) {
+
+	/***
+	 * Assert that the href exists but is explicitly hidden
+	 * @param methodName
+	 * @param href
+	 */
+	public void AssertHrefExistsButIsHidden(String methodName, String href) {
 		AssertHrefExists(methodName,href);
 		AssertHrefNotVisible(methodName,href);
 	}
-	
-	protected void AssertHrefDoesNotExist(String methodName, String href) {
+
+	/***
+	 * Asserts that a href does not exist
+	 * @param methodName
+	 * @param href
+	 */
+	public void AssertHrefDoesNotExist(String methodName, String href) {
 		System.out.println(methodName+": expect next web element locator to fail");
 		Assert.assertFalse(nwd.AnchorExistsWithHREF(href, false));
 	}
 	
 	/*
-	 * Assert dropdown clickable
+	 * Assert hyperlink is clickable
 	 */
-	
-	protected void AssertDropdownMenuClickableAndExists(String anchorId) {
-		Assert.assertNotNull(nwd.clickOnCSSElementIfExists(anchorId));
-	}
-	
-	protected void AssertHyperlinkExistsAndIsClickable(String href) {
+
+	/***
+	 * Asserts that a hyperlink can be clicked
+	 * @param href
+	 */
+	public void AssertHyperlinkExistsAndIsClickable(String href) {
 		String query = nwd.AnchorQueryStringForHREF(href, true);
 		Assert.assertNotNull(nwd.clickOnCSSElementIfExists(query));
 	}
-	
-	protected void AssertHyperlinkExistsAndIsClickableAndDoesNotLeadTo404(String href) {
+
+	/***
+	 * Asserts that a hyperlink can be clicked and does not result in a Http404
+	 * @param href
+	 */
+	public void AssertHyperlinkExistsAndIsClickableAndDoesNotLeadTo404(String href) {
 		AssertHyperlinkExistsAndIsClickable(href);
 		Assert.assertFalse(nwd.isWebPage404());
 	}

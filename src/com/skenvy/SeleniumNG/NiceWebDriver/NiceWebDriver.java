@@ -3,6 +3,7 @@ package com.skenvy.SeleniumNG.NiceWebDriver;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -379,7 +380,7 @@ public abstract class NiceWebDriver {
 	 * @param visibleOnly
 	 * @return
 	 */
-	private String AnchorQueryStringForHREF(String href, boolean visibleOnly) {
+	public String AnchorQueryStringForHREF(String href, boolean visibleOnly) {
 		String query = "a[href*=\""+href+"\"]";
 		if(visibleOnly) {
 			query = ".show > "+query;
@@ -836,7 +837,7 @@ public abstract class NiceWebDriver {
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Send keys!
+ * Send keys : String version
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -851,6 +852,11 @@ public abstract class NiceWebDriver {
 		}
 		return we;
 	}
+	
+	/***
+	 * The string representation of a unicode backspace, if one must be typed
+	 */
+	public static final String unicodekeys_Backspace = "\u0008";
 	
 	/***
 	 * Sends keys to a WebElement found using a CSS Selector
@@ -898,4 +904,68 @@ public abstract class NiceWebDriver {
 		return sendKeysToANonNullWebElement(getWebElementByAnchorWithHrefIfExists(href,visibleOnly),keyStrokes);
 	}
 	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Send keys : Keys[] version
+ */
+///////////////////////////////////////////////////////////////////////////////
+
+	/***
+	 * Sends keys to a WebElement if it is not null
+	 * @param we
+	 * @return
+	 */
+	private WebElement sendKeysToANonNullWebElement(WebElement we, Keys[] keyStrokes) {
+		if (we != null) {
+			we.sendKeys(keyStrokes);
+		}
+		return we;
+	}
+
+	/***
+	 * Sends keys to a WebElement found using a CSS Selector
+	 * @param cssSelector
+	 * @return
+	 */
+	public WebElement sendKeysToCSSElementIfExists(String cssSelector, Keys[] keyStrokes) {
+		return sendKeysToANonNullWebElement(getWebElementByCSSIfExists(cssSelector), keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an XPath
+	 * @param xpath
+	 * @return
+	 */
+	public WebElement sendKeysToXPathElementIfExists(String xpath, Keys[] keyStrokes) {
+		return sendKeysToANonNullWebElement(getWebElementByXPathIfExists(xpath), keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using a link text
+	 * @param linkText
+	 * @return
+	 */
+	public WebElement sendKeysToLinkTextElementIfExists(String linkText, Keys[] keyStrokes) {
+		return sendKeysToANonNullWebElement(getWebElementByLinkTextIfExists(linkText), keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an ID
+	 * @param id
+	 * @return
+	 */
+	public WebElement sendKeysToIdElementIfExists(String id, Keys[] keyStrokes) {
+		return sendKeysToANonNullWebElement(getWebElementByIdIfExists(id), keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an href
+	 * @param href
+	 * @param visibleOnly
+	 * @return
+	 */
+	public WebElement sendKeysToAnchorHrefElementIfExists(String href, Keys[] keyStrokes, boolean visibleOnly) {
+		return sendKeysToANonNullWebElement(getWebElementByAnchorWithHrefIfExists(href, visibleOnly), keyStrokes);
+	}
+
 }
