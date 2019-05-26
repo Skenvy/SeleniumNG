@@ -28,29 +28,89 @@ import com.skenvy.SeleniumNG.NiceWebDriver.NiceChrome;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriver;
 import com.skenvy.SeleniumNG.NiceWebDriver.NiceWebDriverFactory;
 
+/***
+ * An abstract base class that must be extended and have the method
+ * {@code getPathToDomainConstantsConfig()} overridden to suffice the
+ * utilisation of having multiple "selenium node" configurations read in
+ * from an external XML config file and have a single invoking subclass
+ * executed across all the defined selenium nodes. It is recommended to
+ * Make a local abstract extension of this class which overrides the
+ * {@code getPathToDomainConstantsConfig()}, and then sub class that class!
+ */
 public abstract class baseTest {
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * 
+ * vars, the parameterless constructor, and the abstract path encapsulator
  */
 ///////////////////////////////////////////////////////////////////////////////
 
+	
+	/***
+	 * An instance of the NiceWebDriver which will be used to carry out the
+	 * standard WebDriver functionality required of the tests
+	 */
 	protected NiceWebDriver nwd;
+	
+	/***
+	 * The local selenium node that defines whether the test is running locally
+	 * or remotely, what the remote URL is, and what DriverType is required
+	 */
 	private SeleniumNode seleniumNode = null;
+	
+	/***
+	 * Set this to true by invoking 
+	 * {@code declareThisTestAsCurrentlyBeingUnderDevelopment()},
+	 * which will prevent the browser window from being closed at the
+	 * end of the running test, to allow debugging the state of the browser
+	 * when the test ends or is interrupted with an exception.
+	 * Invoke {@code declareThisTestAsCurrentlyBeingUnderDevelopment()} at the
+	 * start of any {@code @Test} case you want this to apply to.
+	 */
 	private boolean testInDevelopment = false;
+	
+	/***
+	 * Set this to true by invoking 
+	 * {@code declareThisTestAsCurrentlyBeingDemonstrated()},
+	 * which will slow the execution of the clicking of WebElements and typing
+	 * Invoke {@code declareThisTestAsCurrentlyBeingDemonstrated()} at the
+	 * start of any {@code @Test} case you want this to apply to.
+	 */
 	private boolean testIsBeingDemonstrated = false;
+	
+	/***
+	 * The base test's reference of the NiceWebDriverFactory singleton
+	 */
 	private final NiceWebDriverFactory nwdf;
 	
+	/***
+	 * The parameterless constructor. Instantiates the NiceWebDriverFactory,
+	 * which in its own turn initialises the static variables of the
+	 * Domain Constants.
+	 */
 	public baseTest() {
 		nwdf = NiceWebDriverFactory.getFactory(getPathToDomainConstantsConfig());
 	}
 	
+	/***
+	 * Make an abstract "base" class for your tests, which overrides this
+	 * and has it return the path to your xml configuration file. You may
+	 * maintain more than one base class that point to different configuration
+	 * files, although if they invoke the constructor of any other subclass to
+	 * this baseTest with a different path returned by this method, then the
+	 * Domain Constants will only match those for the first invocation and the
+	 * singleton NiceWebDriverFactory will block the overwriting of Domain
+	 * Constants that have already been read in from the first config file!
+	 * @return
+	 */
 	public abstract String getPathToDomainConstantsConfig();
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * The @Factory solution to instantiating multiple Selenium tests!
+ * Uses a factory to capture the runtime class of the subclass of the baseTest
+ * then invokes the parameterless constructor and assigns the appropriate
+ * SeleniumNode instantiation.
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
@@ -62,7 +122,6 @@ public abstract class baseTest {
 	 * or the grid-node configuration.
 	 * @throws InterruptedException
 	 */
-	
 	@Factory
 	public Object[] createInstances() throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// Create an array the size of the Selenium node configuration constant
@@ -83,8 +142,17 @@ public abstract class baseTest {
         return result;
     }
 	
-	
-	
+	/***
+	 * Finds the class object for the instantiating subclass, gets the subclass
+	 * constructor, invokes the parameterless subclass constructor, and returns
+	 * a new instance of the subclass passed as a reference to the baseTest.
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws NoSuchMethodException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
 	public baseTest newSubClassInstance() throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		// Get the Class object, cast to an extension of this class, from the class name of the object calling this method
 		Class<? extends baseTest> thisClass = (Class<? extends baseTest>) Class.forName(this.getClass().getName());
@@ -93,12 +161,33 @@ public abstract class baseTest {
 		return newObj;
 	}
 	
+	/***
+	 * Create a new local instance of the invoking subclass.
+	 * @param driverType
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws NoSuchMethodException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
 	public baseTest newLocal(DriverType driverType) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		baseTest newObj = this.newSubClassInstance();
 		newObj.seleniumNode = new SeleniumNode(true,null,driverType);
 		return newObj;
 	}
 	
+	/***
+	 * Create a new remote instance of the invoking subclass.
+	 * @param nodeUrl
+	 * @param driverType
+	 * @return
+	 * @throws ClassNotFoundException
+	 * @throws NoSuchMethodException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 */
 	public baseTest newRemote(URL nodeUrl, DriverType driverType) throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		baseTest newObj = this.newSubClassInstance();
 		newObj.seleniumNode = new SeleniumNode(false,nodeUrl,driverType);
@@ -107,37 +196,70 @@ public abstract class baseTest {
 	
 ///////////////////////////////////////////////////////////////////////////////
 /* 
- * 
+ * The primary TestNG annotations @BeforeClass, @AfterClass and @BeforeMethod
+ * and a Data providers Helper function
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
-	//@BeforeMethod < not super'd
-	//This has been removed from here so as to implement a default factory
-	//public abstract void beforeMethod();
-  
+	/***
+	 * Before a class starts executing its test methods, use the 
+	 * NiceWebDriverFactory to instantiate a new NiceWebDriver of the type
+	 * requested in the configuration file.
+	 * @throws MalformedURLException
+	 * @throws FileNotFoundException
+	 */
 	@BeforeClass
 	public void beforeClass() throws MalformedURLException, FileNotFoundException {
 		if(seleniumNode.local) {
+			//TODO incorporate "arguments" passed in through the config, and remove these Chrome specific options
 			nwd = nwdf.getNiceWebDriver(seleniumNode.dt,"--incognito --start-maximized",DomainConstants.test.waitSeconds);
 		} else {
 			nwd = nwdf.getNiceWebDriverRemote(seleniumNode.dt, seleniumNode.nodeUrl ,DomainConstants.test.waitSeconds);
 		}
 	}
 
+	/***
+	 * After a class has finished executing its test methods, close the driver
+	 * and break the link to the NiceWebdriver object
+	 */
 	@AfterClass
 	public void afterClass() {
 		if(this.testInDevelopment) {
-			//This does nothing currently to block the closing of the window
+			//This does nothing to block the closing of the window
 		} else {
 			nwd.closeWebDriver();
 			nwd = null;
 		}
 	}
-	
+
+	/***
+	 * Before each test method, have the browser load the page specified by the
+	 * "Test.*" entries in the config file, specifically the IP, port and
+	 * Context Root.
+	 */
 	@BeforeMethod
 	public void beforeMethod() {
 		nwd.openTestDefaultAtBase();
 	}
+	
+	/***
+	 * Subclasses of the base test can utilise this to have their
+	 * {@code @DataProvider} return an Object[][] type from a
+	 * collection of Strings
+	 * @param c
+	 * @return
+	 */
+	public static Object[][] wrapStringCollectionToDataProvider(Collection<String> c) {
+		Object[][] objArr = new Object[c.size()][1];
+		int iter = 0;
+		for(String s : c) {
+			objArr[iter][0] = s;
+			iter++;
+		}
+		return objArr;
+	}
+	
+	//TODO Demarcation point
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
@@ -165,13 +287,9 @@ public abstract class baseTest {
 		}
 	}
 	
-	/*
-	 * Clicks and keys
-	 */
-	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * 
+ * Clicks and keys
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
@@ -269,12 +387,9 @@ public abstract class baseTest {
 		}
 	}
 	
-	/*
-	 * Get hyperlink collections
-	 */
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * 
+ * Get hyperlink collections
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
@@ -328,25 +443,6 @@ public abstract class baseTest {
 	protected void AssertHyperlinkExistsAndIsClickableAndDoesNotLeadTo404(String href) {
 		AssertHyperlinkExistsAndIsClickable(href);
 		Assert.assertFalse(nwd.isWebPage404());
-	}
-	
-	/*
-	 * Data providers
-	 */
-///////////////////////////////////////////////////////////////////////////////
-/*
- * 
- */
-///////////////////////////////////////////////////////////////////////////////
-	
-	protected static Object[][] wrapStringCollectionToDataProvider(Collection<String> c) {
-		Object[][] objArr = new Object[c.size()][1];
-		int iter = 0;
-		for(String s : c) {
-			objArr[iter][0] = s;
-			iter++;
-		}
-		return objArr;
 	}
 
 }
