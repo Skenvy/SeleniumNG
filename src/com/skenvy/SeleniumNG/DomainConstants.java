@@ -40,14 +40,36 @@ public final class DomainConstants {
 	 */
 	public static HashMap<DriverType,String> webDriverSystemPaths = new HashMap<DriverType,String>();
 	
+	/***
+	 * A collection of values needed for operating the NiceWebDriver and
+	 * baseTest for the purposes of running a scalable amount of test cases
+	 * against a web site that is hosted on the localhost
+	 */
 	public static Local local = null;
 	
+	/***
+	 * A collection of values needed for operating the NiceWebDriver and
+	 * baseTest for the purposes of running a scalable amount of test cases
+	 * against a web site that is hosted not on the localhost
+	 */
 	public static Test test = null;
 	
+	/***
+	 * Values used to indicate millisecond thread sleeps that should be used to
+	 * mock a running test as a "demonstration" by faking a slower speed.
+	 */
 	public static TestSleeps testSleeps = null;
 	
+	/***
+	 * The number of SeleniumNodes that will be executing the test cases
+	 */
 	public static int seleniumNodeCount = 0;
 	
+	/***
+	 * A collection of the nodes over which the baseTest's factory method will
+	 * re-instantiate the test case for consecutive local execution or
+	 * concurrent remote execution
+	 */
 	public static SeleniumNode[] seleniumNodes = null;
 	
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,35 +100,54 @@ public final class DomainConstants {
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
+	/***
+	 * Loads the configuration XML into the static properties field
+	 * @param configFilePath
+	 * @throws IOException
+	 */
 	private void loadPropertiesFromXMLConfigFile(String configFilePath) throws IOException{
 		FileInputStream in = new FileInputStream(configFilePath);
 		properties.loadFromXML(in);
 		in.close();
 	}
-	
+
+	/***
+	 * Reads the "WebDriverSystemPaths.*" values from the configuration file
+	 * @return
+	 */
 	private void assignWebDriverSystemPaths() {
 		for(DriverType dt : DriverType.values()) {
 			webDriverSystemPaths.put(dt,properties.getProperty(DomainConstantsProperties.webDriverSystemPathPerDriverType.get(dt)));
 		}
 	}
-	
+
+	/***
+	 * Reads the "Local.*" values from the configuration file
+	 * @return
+	 */
 	private Local assignLocal() {
 		int environPort = getPropertyInteger(DomainConstantsProperties.LocalEnvironPort,DomainConstantsProperties.defaultEnvironPort);
 		String webContextRoot = properties.getProperty(DomainConstantsProperties.LocalWebContextRoot,DomainConstantsProperties.defaultWebContextRoot);
 		int waitSeconds = getPropertyInteger(DomainConstantsProperties.LocalWaitSeconds,DomainConstantsProperties.defaultWaitSeconds);
-		int instantiationMaxRetry = getPropertyInteger(DomainConstantsProperties.LocalInstantiationMaxRetry,DomainConstantsProperties.defaultInstantiationMaxRetry);
-		return new Local(environPort,webContextRoot,waitSeconds,instantiationMaxRetry);
+		return new Local(environPort,webContextRoot,waitSeconds);
 	}
 	
+	/***
+	 * Reads the "Test.*" values from the configuration file
+	 * @return
+	 */
 	private Test assignTest() {
 		String environIP = properties.getProperty(DomainConstantsProperties.TestEnvironIP,DomainConstantsProperties.defaultEnvironIP);
 		int environPort = getPropertyInteger(DomainConstantsProperties.TestEnvironPort,DomainConstantsProperties.defaultEnvironPort);
 		String webContextRoot = properties.getProperty(DomainConstantsProperties.TestWebContextRoot,DomainConstantsProperties.defaultWebContextRoot);
 		int waitSeconds = getPropertyInteger(DomainConstantsProperties.TestWaitSeconds,DomainConstantsProperties.defaultWaitSeconds);
-		int instantiationMaxRetry = getPropertyInteger(DomainConstantsProperties.TestInstantiationMaxRetry,DomainConstantsProperties.defaultInstantiationMaxRetry);
-		return new Test(environIP,environPort,webContextRoot,waitSeconds,instantiationMaxRetry);
+		return new Test(environIP,environPort,webContextRoot,waitSeconds);
 	}
 	
+	/***
+	 * Reads the "TestSleepsMilliSecond*" values from the configuration file
+	 * @return
+	 */
 	private TestSleeps assignTestSleeps() {
 		int milliSecondsBetweenKeyStrokes = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondsBetweenKeyStrokes, DomainConstantsProperties.defaultMilliSecondsBetweenKeyStrokes);
 		int milliSecondsBeforeClick = getPropertyInteger(DomainConstantsProperties.TestSleepsMilliSecondsBeforeClick, DomainConstantsProperties.defaultMilliSecondsBeforeClick);
@@ -116,10 +157,21 @@ public final class DomainConstants {
 		return new TestSleeps(milliSecondsBetweenKeyStrokes,milliSecondsBeforeClick,milliSecondsAfterClick,milliSecondSimulateInteractivePause,milliSecondDurationOfSuccessMessage);
 	}
 	
+	/***
+	 * Reads the SeleniumNodeCount property from the configuration file
+	 * @return
+	 */
 	private int assignSeleniumNodeCount() {
 		return getPropertyInteger(DomainConstantsProperties.SeleniumNodeCount, DomainConstantsProperties.defaultSeleniumNodeCount);
 	}
 	
+	/***
+	 * Read from the configuration properties and create as many instances of
+	 * SeleniumNode up to the amount specified by the SeleniumNodeCount.
+	 * Reads whether the node is local, what driver type it requires, and
+	 * the remote URL, if there is a remote URL (if not locally executed)
+	 * @throws MalformedURLException
+	 */
 	private void assignSeleniumNodes() throws MalformedURLException {
 		seleniumNodes = new SeleniumNode[seleniumNodeCount];
 		for(int k = 1; k <= seleniumNodeCount; k++) {
@@ -149,12 +201,26 @@ public final class DomainConstants {
 		public final static String HTTPS = "https";
 	}
 	
+	/***
+	 * A collection of values needed for operating the NiceWebDriver and
+	 * baseTest for the purposes of running a scalable amount of test cases
+	 * against a web site that is hosted on the localhost
+	 */
 	public static class Local {
-		
+
+		/***
+		 * The port to connect to on the localhost
+		 */
 		public final int environPort;
+		/***
+		 * The portion of the URL immediately after the host and port, prior to
+		 * the query part of the URL
+		 */
 		public final String webContextRoot;
+		/***
+		 * How many seconds to wait for the discovery of WebElements
+		 */
 		public final int waitSeconds;
-		public final int instantiationMaxRetry;
 		
 		/***
 		 * Constructs a Local object, accessed through the DomainConstants
@@ -162,26 +228,40 @@ public final class DomainConstants {
 		 * @param environPort
 		 * @param webContextRoot
 		 * @param waitSeconds
-		 * @param instantiationMaxRetry
 		 */
-		protected Local(int environPort, String webContextRoot, int waitSeconds, int instantiationMaxRetry){
+		protected Local(int environPort, String webContextRoot, int waitSeconds){
 			this.environPort = environPort;
 			this.webContextRoot = webContextRoot;
 			validateIntIsGreaterThan(waitSeconds,DomainConstantsProperties.LocalWaitSeconds,0);
 			this.waitSeconds = waitSeconds;
-			validateIntIsGreaterThan(instantiationMaxRetry,DomainConstantsProperties.LocalInstantiationMaxRetry,0);
-			this.instantiationMaxRetry = instantiationMaxRetry;
 		}
 		
 	}
 	
+	/***
+	 * A collection of values needed for operating the NiceWebDriver and
+	 * baseTest for the purposes of running a scalable amount of test cases
+	 * against a web site that is hosted not on the localhost
+	 */
 	public static class Test {
 		
+		/***
+		 * The host address under test
+		 */
 		public final String environIP;
+		/***
+		 * The port to connect to on the test host
+		 */
 		public final int environPort;
+		/***
+		 * The portion of the URL immediately after the host and port, prior to
+		 * the query part of the URL
+		 */
 		public final String webContextRoot;
+		/***
+		 * How many seconds to wait for the discovery of WebElements
+		 */
 		public final int waitSeconds;
-		public final int instantiationMaxRetry;
 		
 		/***
 		 * Constructs a Test object, accessed through the DomainConstants
@@ -190,16 +270,13 @@ public final class DomainConstants {
 		 * @param environPort
 		 * @param webContextRoot
 		 * @param waitSeconds
-		 * @param instantiationMaxRetry
 		 */
-		protected Test(String environIP, int environPort, String webContextRoot, int waitSeconds, int instantiationMaxRetry) {
+		protected Test(String environIP, int environPort, String webContextRoot, int waitSeconds) {
 			this.environIP = environIP;
 			this.environPort = environPort;
 			this.webContextRoot = webContextRoot;
 			validateIntIsGreaterThan(waitSeconds,DomainConstantsProperties.TestWaitSeconds,0);
 			this.waitSeconds = waitSeconds;
-			validateIntIsGreaterThan(instantiationMaxRetry,DomainConstantsProperties.TestInstantiationMaxRetry,0);
-			this.instantiationMaxRetry = instantiationMaxRetry;
 		}
 		
 	}

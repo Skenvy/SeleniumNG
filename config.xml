@@ -18,13 +18,11 @@
 <entry key="Local.EnvironPort">8080</entry>
 <entry key="Local.WebContextRoot"></entry>
 <entry key="Local.WaitSeconds">1</entry>
-<entry key="Local.InstantiationMaxRetry">5</entry>
 <!-- Test -->
 <entry key="Test.EnvironIP">localhost</entry>
 <entry key="Test.EnvironPort">8080</entry>
 <entry key="Test.WebContextRoot"></entry>
 <entry key="Test.WaitSeconds">1</entry>
-<entry key="Test.InstantiationMaxRetry">5</entry>
 <!-- TestSleeps : Used only when "demonstrating" a test -->
 <entry key="TestSleeps.MilliSecondsBetweenKeyStrokes">100</entry>
 <entry key="TestSleeps.MilliSecondsBeforeClick">100</entry>

@@ -52,8 +52,6 @@ final class DomainConstantsProperties {
 	private final static String WebContextRoot = "WebContextRoot";
 	/***WaitSeconds*/
 	private final static String WaitSeconds = "WaitSeconds";
-	/***InstantiationMaxRetry*/
-	private final static String InstantiationMaxRetry = "InstantiationMaxRetry";
 
 	/***MilliSecondsBetweenKeyStrokes*/
 	private final static String MilliSecondsBetweenKeyStrokes = "MilliSecondsBetweenKeyStrokes";
@@ -128,8 +126,6 @@ final class DomainConstantsProperties {
 	protected final static String LocalWebContextRoot = Local+"."+WebContextRoot;
 	/***Local.WaitSeconds*/
 	protected final static String LocalWaitSeconds = Local+"."+WaitSeconds;
-	/***Local.InstantiationMaxRetry*/
-	protected final static String LocalInstantiationMaxRetry = Local+"."+InstantiationMaxRetry;
 	
 	/*
 	 * Config names : Test
@@ -143,8 +139,6 @@ final class DomainConstantsProperties {
 	protected final static String TestWebContextRoot = Test+"."+WebContextRoot;
 	/***Test.WaitSeconds*/
 	protected final static String TestWaitSeconds = Test+"."+WaitSeconds;
-	/***Test.InstantiationMaxRetry*/
-	protected final static String TestInstantiationMaxRetry = Test+"."+InstantiationMaxRetry;
 	
 	/*
 	 * Config names : TestSleep
