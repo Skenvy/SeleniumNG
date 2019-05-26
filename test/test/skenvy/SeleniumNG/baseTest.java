@@ -15,7 +15,7 @@ public class baseTest extends com.skenvy.SeleniumNG.baseTest {
 
 	@Override
 	public String getPathToDomainConstantsConfig() {
-		return "C:\\workspaces\\MYGITHUB\\SeleniumNG\\config.xml";
+		return System.getProperty("user.dir")+"\\config_test.xml";
 	}
 
 }

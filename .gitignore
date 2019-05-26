@@ -25,3 +25,6 @@ hs_err_pid*
 
 # testNG test output
 /test-output/
+
+# Test configuration XML
+*test.xml

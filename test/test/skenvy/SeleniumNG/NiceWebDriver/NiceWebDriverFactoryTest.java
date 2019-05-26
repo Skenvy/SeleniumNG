@@ -14,9 +14,10 @@ public class NiceWebDriverFactoryTest {
 	public NiceWebDriverFactoryTest() {
 		// TODO Auto-generated constructor stub
 	}
-
+	
 	public static void main(String[] args) throws IOException {
-		NiceWebDriverFactory nwdf = NiceWebDriverFactory.getFactory("C:\\workspaces\\MYGITHUB\\SeleniumNG\\config.xml");
+		final String dir = System.getProperty("user.dir");
+		NiceWebDriverFactory nwdf = NiceWebDriverFactory.getFactory(dir+"\\config_test.xml");
 		//System.out.println(DomainConstants.webDriverSystemPaths.get(DriverType.Chrome));
 		NiceWebDriver a = NiceWebDriverFactory.getFactory().getNiceWebDriver(DriverType.Chrome, "--incognito --start-maximized");
 		//a.openWebPage("https://www.google.com");

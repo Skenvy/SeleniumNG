@@ -3,7 +3,7 @@
 <properties>
 <comment>-- Properties File Comments --</comment>
 <!-- WebDriverSystemPaths -->
-<entry key="WebDriverSystemPaths.Chrome">C:\Users\i-am-\Documents\06. PROGRAMS\Programming\Selenium\chromedriver_74.exe</entry>
+<entry key="WebDriverSystemPaths.Chrome">C:\path\to\chromedriver\chromedriver.exe</entry>
 <entry key="WebDriverSystemPaths.Firefox"></entry>
 <entry key="WebDriverSystemPaths.IE"></entry>
 <entry key="WebDriverSystemPaths.Edge"></entry>
