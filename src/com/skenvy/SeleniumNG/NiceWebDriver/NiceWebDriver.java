@@ -57,6 +57,11 @@ public abstract class NiceWebDriver {
 	 */
 	private String localIP = null;
 	
+	/***
+	 * Determines whether or not verbose messages will be printed
+	 */
+	private boolean verboseMode = false;
+	
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Constructors
@@ -293,6 +298,27 @@ public abstract class NiceWebDriver {
 		return null;
 	}
 	
+	/***
+	 * Gets the current instance of the NiceWebDriver after adjusting the
+	 * verbostiy.
+	 * @param verbosity
+	 * @return
+	 */
+	public NiceWebDriver getThisWithVerbositySetTo(boolean verboseMode) {
+		this.verboseMode = verboseMode;
+		return this;
+	}
+	
+	/***
+	 * Writes a verbose message to sysout
+	 * @param message
+	 */
+	private void writeVerboseMessageToSysOut(String message) {
+		if(this.verboseMode) {
+			System.out.println(message);
+		}
+	}
+	
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Unwrappers : Getters for the private final fields if the methods here
@@ -439,7 +465,7 @@ public abstract class NiceWebDriver {
 	 */
 	public boolean confirmCurrentPageIs(String expectedSubroot) {
 		String subroot = getCurrentUrlAsURI().getPath();
-		System.out.println(subroot+" || "+expectedSubroot);
+		writeVerboseMessageToSysOut(subroot+" || "+expectedSubroot);
 		return (subroot.equals(expectedSubroot));
 	}
 
@@ -728,22 +754,22 @@ public abstract class NiceWebDriver {
 		String byString = "by "+selectorType+" String: "+by.toString();
 		try {
 			WebElement we = this.webDriver.findElement(by);
-			System.out.println("Succeeded in locating WebElement (first attempt) "+byString);
+			writeVerboseMessageToSysOut("Succeeded in locating WebElement (first attempt) "+byString);
 			return we;
 		} catch (NoSuchElementException e) {
-			System.out.println("Failed to locate WebElement (first attempt) "+byString);
+			writeVerboseMessageToSysOut("Failed to locate WebElement (first attempt) "+byString);
 			try{
 				this.wait.until(ExpectedConditions.presenceOfElementLocated(by));
 				try {
 					WebElement we = this.webDriver.findElement(by);
-					System.out.println("Succeeded in locating WebElement (second attempt) "+byString);
+					writeVerboseMessageToSysOut("Succeeded in locating WebElement (second attempt) "+byString);
 					return we;
 				} catch (NoSuchElementException e2) {
-					System.out.println("Failed to locate WebElement (second attempt : after a successful wait_until!) "+byString);
+					writeVerboseMessageToSysOut("Failed to locate WebElement (second attempt : after a successful wait_until!) "+byString);
 					return null;
 				}
 			} catch (TimeoutException te) {
-				System.out.println("Failed to locate WebElement (second attempt : failed the wait_until) "+byString);
+				System.err.println("Failed to locate WebElement (second attempt : failed the wait_until) "+byString);
 				return null;
 			}
 		}
@@ -870,7 +896,7 @@ public abstract class NiceWebDriver {
 	 * @param we
 	 * @return
 	 */
-	private WebElement sendKeysToANonNullWebElement(WebElement we, String keyStrokes) {
+	public WebElement sendKeysToANonNullWebElement(WebElement we, String keyStrokes) {
 		if(we != null) {
 			we.sendKeys(keyStrokes);
 		}
@@ -939,13 +965,13 @@ public abstract class NiceWebDriver {
 	 * @param we
 	 * @return
 	 */
-	private WebElement sendKeysToANonNullWebElement(WebElement we, Keys[] keyStrokes) {
+	public WebElement sendKeysToANonNullWebElement(WebElement we, Keys[] keyStrokes) {
 		if (we != null) {
 			we.sendKeys(keyStrokes);
 		}
 		return we;
 	}
-
+	
 	/***
 	 * Sends keys to a WebElement found using a CSS Selector
 	 * @param cssSelector

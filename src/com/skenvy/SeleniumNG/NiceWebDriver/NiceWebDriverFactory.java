@@ -57,9 +57,9 @@ public class NiceWebDriverFactory {
 	 * Instantiate the NiceWebDriverFactory singleton
 	 * @throws IOException 
 	 */
-	private NiceWebDriverFactory(DomainConstants domainConstants){
+	private NiceWebDriverFactory(DomainConstants domainConstantsIn){
 		driversSet = new ArrayList<DriverType>();
-		this.domainConstants = domainConstants;
+		domainConstants = domainConstantsIn;
 	}
 	
 	/***
@@ -111,7 +111,7 @@ public class NiceWebDriverFactory {
 	 * for nullity checking, to confirm that the class's constructor has been
 	 * called, thus appropriately assigning values to the static fields.
 	 */
-	private DomainConstants domainConstants;
+	private static DomainConstants domainConstants;
 	
 	/***
 	 * Get the DomainConstants field associated with the
@@ -119,7 +119,35 @@ public class NiceWebDriverFactory {
 	 * @return
 	 */
 	public DomainConstants getDomainConstants() {
-		return this.domainConstants;
+		return domainConstants;
+	}
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Must allow for declaring verbose output or turning it off
+ */
+///////////////////////////////////////////////////////////////////////////////
+
+	/***
+	 * Determines whether the factory or instantiated NiceWebDriver's will
+	 * print verbose messages
+	 */
+	private static boolean outputIsVerbose = false;
+
+	/***
+	 * Get the verbosity
+	 * @return
+	 */
+	public boolean getOutputIsVerbose() {
+		return outputIsVerbose;
+	}
+	
+	/***
+	 * Sets the verbosity of the NiceWebDriverFactory
+	 * @param verboseMode
+	 */
+	public void setVerboseModeOn(boolean verboseMode) {
+		outputIsVerbose = verboseMode;
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
@@ -298,7 +326,7 @@ public class NiceWebDriverFactory {
 	private NiceWebDriver getNiceWebDriverInstance(DriverType driverType, Object[] oArgs){
 		switch(driverType) {
 			case Chrome:
-				return new NiceChrome().UnderloadedNiceWebDriverConstructor(oArgs);
+				return new NiceChrome().UnderloadedNiceWebDriverConstructor(oArgs).getThisWithVerbositySetTo(outputIsVerbose);
 			case Firefox:
 				return null; //TODO: Make Firefox subclass
 			case IE:
@@ -356,7 +384,7 @@ public class NiceWebDriverFactory {
 	 * @throws NullPointerException
 	 */
 	private void setSystemPropertyWebDriver(DriverType driverType) throws FileNotFoundException, NullPointerException {
-		if(this.domainConstants != null) {
+		if(domainConstants != null) {
 			String driverPath = DomainConstants.webDriverSystemPaths.get(driverType);
 			setSystemPropertyWebDriver(driverType, driverPath);
 		} else {

@@ -74,6 +74,13 @@ public abstract class baseTest {
 	private boolean testIsBeingDemonstrated = false;
 	
 	/***
+	 * Set this to true by invoking 
+	 * {@code declaseThisTestAsHavingVerboseOutput()}, to have verbose output
+	 * enabled, or false with {@code declaseThisTestAsNotHavingVerboseOutput()}
+	 */
+	private boolean testOutputIsVerbose = false;
+	
+	/***
 	 * The base test's reference of the NiceWebDriverFactory singleton
 	 */
 	private final NiceWebDriverFactory nwdf;
@@ -262,7 +269,7 @@ public abstract class baseTest {
  * development" for the purposes of debugging the browser if a test throws an
  * exception, and to declare a test as being "demonstrated" which will prompt
  * periodic sleeps for each action that should be slowed down for demonstration
- * purposes!
+ * purposes! Also turn verbose output on or off
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
@@ -282,6 +289,33 @@ public abstract class baseTest {
 	public void declareThisTestAsCurrentlyBeingDemonstrated() {
 		this.testIsBeingDemonstrated = true;
 	}
+	
+	/***
+	 * Call this at the start of an {@code @Test} annotated method to have
+	 * verbose output!
+	 */
+	public void declaseThisTestAsHavingVerboseOutput() {
+		this.testOutputIsVerbose = true;
+		assignVerbosityToTheNWDFAndNWD();
+	}
+	
+	/***
+	 * Call this at the start of an {@code @Test} annotated method to have
+	 * verbose output that was previously turned on, turned off!
+	 */
+	public void declaseThisTestAsNotHavingVerboseOutput() {
+		this.testOutputIsVerbose = false;
+		assignVerbosityToTheNWDFAndNWD();
+	}
+	
+	/***
+	 * Trickle down the verbosity declared by an individual test to the
+	 * NiceWebDriver and NiceWebDriverFactory
+	 */
+	private void assignVerbosityToTheNWDFAndNWD() {
+		nwdf.setVerboseModeOn(this.testOutputIsVerbose);
+		nwd.getThisWithVerbositySetTo(this.testOutputIsVerbose);
+	}
 
 	/***
 	 * Call this during a test to have the browser temporarily pause, until at
@@ -290,17 +324,26 @@ public abstract class baseTest {
 	 * an enhanced "demonstration" which requires explaining static views.
 	 * @throws InterruptedException
 	 */
-	public void promptEnterKey() throws InterruptedException{
+	public void promptPauseSoft() throws InterruptedException{
 		if(this.testIsBeingDemonstrated) {
 			if(nwd.isRunningRemotely()) {
-				System.out.println("Press \"ENTER\" to continue...");
-				Scanner scanner = new Scanner(System.in);
-				scanner.nextLine();
-				scanner.close();
+				promptPauseHard();
 			} else {
 				sleepForTheDurationOfAPrompt();
 			}
 		}
+	}
+	
+	/***
+	 * Call this during a test to have the browser paused until user input is
+	 * provided to the running class.
+	 * @throws InterruptedException
+	 */
+	public void promptPauseHard() throws InterruptedException{
+		System.out.println("Press \"ENTER\" to continue...");
+		Scanner scanner = new Scanner(System.in);
+		scanner.nextLine();
+		scanner.close();
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
@@ -451,7 +494,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToCSSElementIfExists(String cssSelector, String keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToCSSElementIfExists(cssSelector,"");
 		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToCSSElementIfExists(cssSelector,keyStroke+"");
+			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -467,7 +510,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToXPathElementIfExists(String xpath, String keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToXPathElementIfExists(xpath,"");
 		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToXPathElementIfExists(xpath,keyStroke+"");
+			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -483,7 +526,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToLinkTextElementIfExists(String linkText, String keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToLinkTextElementIfExists(linkText,"");
 		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToLinkTextElementIfExists(linkText,keyStroke+"");
+			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -499,7 +542,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToIdElementIfExists(String id, String keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToIdElementIfExists(id,"");
 		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToIdElementIfExists(id,keyStroke+"");
+			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -516,7 +559,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToAnchorHrefElementIfExists(String href, String keyStrokes, boolean visibleOnly) throws InterruptedException {
 		WebElement we = nwd.sendKeysToAnchorHrefElementIfExists(href,"",visibleOnly);
 		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToAnchorHrefElementIfExists(href,keyStroke+"",visibleOnly);
+			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -538,7 +581,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToCSSElementIfExists(String cssSelector, Keys[] keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToCSSElementIfExists(cssSelector, "");
 		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToCSSElementIfExists(cssSelector, new Keys[]{keyStroke});
+			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -554,7 +597,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToXPathElementIfExists(String xpath, Keys[] keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToXPathElementIfExists(xpath, "");
 		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToXPathElementIfExists(xpath, new Keys[]{keyStroke});
+			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -570,7 +613,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToLinkTextElementIfExists(String linkText, Keys[] keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToLinkTextElementIfExists(linkText, "");
 		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToLinkTextElementIfExists(linkText, new Keys[]{keyStroke});
+			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -586,7 +629,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToIdElementIfExists(String id, Keys[] keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToIdElementIfExists(id, "");
 		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToIdElementIfExists(id, new Keys[]{keyStroke});
+			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
 			sleepBetweenKeyStrokes();
 		}
 		return we;
@@ -603,7 +646,7 @@ public abstract class baseTest {
 	public WebElement sendKeysToAnchorHrefElementIfExists(String href, Keys[] keyStrokes, boolean visibleOnly) throws InterruptedException {
 		WebElement we = nwd.sendKeysToAnchorHrefElementIfExists(href, "", visibleOnly);
 		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToAnchorHrefElementIfExists(href, new Keys[]{keyStroke}, visibleOnly);
+			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
 			sleepBetweenKeyStrokes();
 		}
 		return we;
