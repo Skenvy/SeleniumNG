@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 
 import org.openqa.selenium.Keys;
@@ -200,7 +201,7 @@ public abstract class baseTest {
 ///////////////////////////////////////////////////////////////////////////////
 /* 
  * The primary TestNG annotations @BeforeClass, @AfterClass and @BeforeMethod
- * and a Data providers Helper function
+ * and a Data providers Helper functions
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
@@ -248,16 +249,33 @@ public abstract class baseTest {
 	
 	/***
 	 * Subclasses of the base test can utilise this to have their
-	 * {@code @DataProvider} return an {@code Object[][]} type from a
-	 * collection of Strings
+	 * {@code @DataProvider} return an {@code Object[collection.size()][1]}
+	 * type from a collection of some object
 	 * @param c
 	 * @return
 	 */
-	public static Object[][] wrapStringCollectionToDataProvider(Collection<String> c) {
-		Object[][] objArr = new Object[c.size()][1];
+	public static <K> Object[][] wrapCollectionToDataProvider(Collection<K> collection) {
+		Object[][] objArr = new Object[collection.size()][1];
 		int iter = 0;
-		for(String s : c) {
-			objArr[iter][0] = s;
+		for(K k : collection) {
+			objArr[iter][0] = k;
+			iter++;
+		}
+		return objArr;
+	}
+	
+	/***
+	 * Subclasses of the base test can utilise this to have their
+	 * {@code @DataProvider} return an {@code Object[list.size()][1]} type from
+	 * a list of some object
+	 * @param c
+	 * @return
+	 */
+	public static <K> Object[][] wrapListToDataProvider(List<K> list) {
+		Object[][] objArr = new Object[list.size()][1];
+		int iter = 0;
+		for(K k : list) {
+			objArr[iter][0] = k;
 			iter++;
 		}
 		return objArr;
