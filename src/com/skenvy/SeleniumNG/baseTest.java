@@ -46,7 +46,7 @@ public abstract class baseTest {
 	 * An instance of the NiceWebDriver which will be used to carry out the
 	 * standard WebDriver functionality required of the tests
 	 */
-	protected NiceWebDriver nwd;
+	private NiceWebDriver nwd;
 	
 	/***
 	 * The local selenium node that defines whether the test is running locally
@@ -279,6 +279,37 @@ public abstract class baseTest {
 			iter++;
 		}
 		return objArr;
+	}
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Unwrappers : Getters for the private final fields if the methods here
+ * do not fully encapsulate the behavour necessary of the NiceWebDriver
+ */
+///////////////////////////////////////////////////////////////////////////////
+	
+	/***
+	 * Get the underlying NiceWebDriver
+	 * @return
+	 */
+	public NiceWebDriver unwrapNiceWebDriver() {
+		return nwd;
+	}
+	
+	/***
+	 * Get the underlying NiceWebDriverFactory
+	 * @return
+	 */
+	public NiceWebDriverFactory unwrapNiceWebDriverFactory() {
+		return nwdf;
+	}
+	
+	/***
+	 * Get the underlying SeleniumNode
+	 * @return
+	 */
+	public SeleniumNode unwrapSeleniumNode() {
+		return seleniumNode;
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
@@ -585,7 +616,7 @@ public abstract class baseTest {
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Send keys! : Strings
+ * Send keys! : Keys[]
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -668,6 +699,140 @@ public abstract class baseTest {
 			sleepBetweenKeyStrokes();
 		}
 		return we;
+	}
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Send keys after clicking an element! : Strings
+ */
+///////////////////////////////////////////////////////////////////////////////
+
+	/***
+	 * Sends keys to a WebElement found using a CSS Selector, wrapped with
+	 * demonstration sleeps, after clicking the WebElement, and clearing it.
+	 * @param cssSelector
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToCSSElementIfExists(String cssSelector, String keyStrokes) throws InterruptedException {
+		clickOnCSSElementIfExists(cssSelector).clear();
+		return sendKeysToCSSElementIfExists(cssSelector,keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an XPath, wrapped with demonstration
+	 * sleeps, after clicking the WebElement, and clearing it.
+	 * @param xpath
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToXPathElementIfExists(String xpath, String keyStrokes) throws InterruptedException {
+		clickOnXPathElementIfExists(xpath).clear();
+		return sendKeysToXPathElementIfExists(xpath,keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using a link text, wrapped with
+	 * demonstration sleeps, after clicking the WebElement, and clearing it.
+	 * @param linkText
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToLinkTextElementIfExists(String linkText, String keyStrokes) throws InterruptedException {
+		clickOnLinkTextElementIfExists(linkText).clear();
+		return sendKeysToLinkTextElementIfExists(linkText,keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an ID, wrapped with demonstration
+	 * sleeps, after clicking the WebElement, and clearing it.
+	 * @param id
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToIdElementIfExists(String id, String keyStrokes) throws InterruptedException {
+		clickOnIdElementIfExists(id).clear();
+		return sendKeysToIdElementIfExists(id,keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an href, wrapped with demonstration
+	 * sleeps, after clicking the WebElement, and clearing it.
+	 * @param href
+	 * @param visibleOnly
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToAnchorHrefElementIfExists(String href, String keyStrokes, boolean visibleOnly) throws InterruptedException {
+		clickOnAnchorHrefElementIfExists(href,visibleOnly).clear();
+		return sendKeysToAnchorHrefElementIfExists(href,keyStrokes,visibleOnly);
+	}
+
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Send keys after clicking an element! : Keys[]
+ */
+///////////////////////////////////////////////////////////////////////////////
+
+	/***
+	 * Sends keys to a WebElement found using a CSS Selector, wrapped with
+	 * demonstration sleeps, after clicking the WebElement, and clearing it.
+	 * @param cssSelector
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToCSSElementIfExists(String cssSelector, Keys[] keyStrokes) throws InterruptedException {
+		clickOnCSSElementIfExists(cssSelector).clear();
+		return sendKeysToCSSElementIfExists(cssSelector,keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an XPath, wrapped with demonstration
+	 * sleeps, after clicking the WebElement, and clearing it.
+	 * @param xpath
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToXPathElementIfExists(String xpath, Keys[] keyStrokes) throws InterruptedException {
+		clickOnXPathElementIfExists(xpath).clear();
+		return sendKeysToXPathElementIfExists(xpath,keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using a link text, wrapped with
+	 * demonstration sleeps, after clicking the WebElement, and clearing it.
+	 * @param linkText
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToLinkTextElementIfExists(String linkText, Keys[] keyStrokes) throws InterruptedException {
+		clickOnLinkTextElementIfExists(linkText).clear();
+		return sendKeysToLinkTextElementIfExists(linkText,keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an ID, wrapped with demonstration
+	 * sleeps, after clicking the WebElement, and clearing it.
+	 * @param id
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToIdElementIfExists(String id, Keys[] keyStrokes) throws InterruptedException {
+		clickOnIdElementIfExists(id).clear();
+		return sendKeysToIdElementIfExists(id,keyStrokes);
+	}
+
+	/***
+	 * Sends keys to a WebElement found using an href, wrapped with demonstration
+	 * sleeps, after clicking the WebElement, and clearing it.
+	 * @param href
+	 * @param visibleOnly
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public WebElement sendKeysAfterClickingToAnchorHrefElementIfExists(String href, Keys[] keyStrokes, boolean visibleOnly) throws InterruptedException {
+		clickOnAnchorHrefElementIfExists(href,visibleOnly).clear();
+		return sendKeysToAnchorHrefElementIfExists(href,keyStrokes,visibleOnly);
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////

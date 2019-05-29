@@ -2,6 +2,8 @@ package com.skenvy.SeleniumNG.NiceWebDriver;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.ElementNotInteractableException;
+import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.MutableCapabilities;
@@ -740,13 +742,16 @@ public abstract class NiceWebDriver {
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Get Element
+ * Get Element | The good stuff
  */
 ///////////////////////////////////////////////////////////////////////////////
-
+	
+	//<When clicking>: org.openqa.selenium.ElementNotVisibleException: element not interactable
+	//<When typing>:   org.openqa.selenium.ElementNotInteractableException: element not interactable
+	
 	/***
 	 * Returns a WebElement by using "BY", if it exists, 
-	 * after waiting for it's presence
+	 * after waiting for its presence
 	 * @param cssSelectorQuery
 	 * @return
 	 */
@@ -774,6 +779,32 @@ public abstract class NiceWebDriver {
 			}
 		}
 	}
+	
+	/***
+	 * Returns the WebElement parsed if it is viewable (for .click()).
+	 * @param we
+	 * @return
+	 */
+	private WebElement handleElementNotVisibleException(WebElement we) {
+		//<When clicking>: org.openqa.selenium.ElementNotVisibleException: element not interactable
+		return this.wait.until(ExpectedConditions.visibilityOf(we));
+	}
+	
+	/***
+	 * Returns the WebElement parsed if it is clickable (for .sendKeys()).
+	 * @param we
+	 * @return
+	 */
+	private WebElement handleElementNotInteractableException(WebElement we) {
+		//<When typing>: org.openqa.selenium.ElementNotInteractableException: element not interactable
+		return this.wait.until(ExpectedConditions.elementToBeClickable(we));
+	}
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Get Element | By!
+ */
+///////////////////////////////////////////////////////////////////////////////
 	
 	/***
 	 * Gets a WebElement using the CSS Selector
@@ -834,7 +865,25 @@ public abstract class NiceWebDriver {
 	 */
 	private WebElement clickANonNullWebElement(WebElement we){
 		if(we != null) {
-			we.click();
+			try {
+				we.click();
+			} catch(ElementNotVisibleException e1) {
+				try {
+					handleElementNotVisibleException(we).click();
+				} catch (ElementNotVisibleException e2) {
+					/* The page might still be dynamically loading despite the
+					 * element already being "viewable." The only option now
+					 * is a "Thread.sleep(); Eww. Call the sleep, then try the
+					 * handler again, with no try catch protection, anything
+					 * after this is a genuine error. */
+					try {
+						Thread.sleep(DomainConstants.local.waitSeconds*1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					handleElementNotVisibleException(we).click();
+				}
+			}
 		}
 		return we;
 	}
@@ -898,7 +947,25 @@ public abstract class NiceWebDriver {
 	 */
 	public WebElement sendKeysToANonNullWebElement(WebElement we, String keyStrokes) {
 		if(we != null) {
+			try {
 			we.sendKeys(keyStrokes);
+			} catch(ElementNotInteractableException e1) {
+				try {
+					handleElementNotInteractableException(we).sendKeys(keyStrokes);
+				} catch (ElementNotInteractableException e2) {
+					/* The page might still be dynamically loading despite the
+					 * element already being "clickable." The only option now
+					 * is a "Thread.sleep(); Eww. Call the sleep, then try the
+					 * handler again, with no try catch protection, anything
+					 * after this is a genuine error. */
+					try {
+						Thread.sleep(DomainConstants.local.waitSeconds*1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					handleElementNotInteractableException(we).sendKeys(keyStrokes);
+				}
+			}
 		}
 		return we;
 	}
