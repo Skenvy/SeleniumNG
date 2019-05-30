@@ -5,11 +5,11 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.ElementNotVisibleException;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -811,7 +811,7 @@ public abstract class NiceWebDriver {
 	 * @param cssSelector
 	 * @return
 	 */
-	private WebElement getWebElementByCSSIfExists(String cssSelector) {
+	public WebElement getWebElementByCSSIfExists(String cssSelector) {
 		return getWebElementIfExists(By.cssSelector(cssSelector),"CSS Selector");
 	}
 
@@ -820,7 +820,7 @@ public abstract class NiceWebDriver {
 	 * @param xpath
 	 * @return
 	 */
-	private WebElement getWebElementByXPathIfExists(String xpath) {
+	public WebElement getWebElementByXPathIfExists(String xpath) {
 		return getWebElementIfExists(By.xpath(xpath),"XPath");
 	}
 
@@ -829,7 +829,7 @@ public abstract class NiceWebDriver {
 	 * @param linkText
 	 * @return
 	 */
-	private WebElement getWebElementByLinkTextIfExists(String linkText) {
+	public WebElement getWebElementByLinkTextIfExists(String linkText) {
 		return getWebElementIfExists(By.linkText(linkText),"Link Text");
 	}
 
@@ -838,7 +838,7 @@ public abstract class NiceWebDriver {
 	 * @param id
 	 * @return
 	 */
-	private WebElement getWebElementByIdIfExists(String id) {
+	public WebElement getWebElementByIdIfExists(String id) {
 		return getWebElementIfExists(By.id(id),"ID");
 	}
 
@@ -848,7 +848,7 @@ public abstract class NiceWebDriver {
 	 * @param visibleOnly
 	 * @return
 	 */
-	private WebElement getWebElementByAnchorWithHrefIfExists(String href, boolean visibleOnly) {
+	public WebElement getWebElementByAnchorWithHrefIfExists(String href, boolean visibleOnly) {
 		return getWebElementByCSSIfExists(AnchorQueryStringForHREF(href, visibleOnly));
 	}
 	
@@ -868,14 +868,15 @@ public abstract class NiceWebDriver {
 			try {
 				we.click();
 			} catch(ElementNotVisibleException e1) {
+				//Make sure we wait until it is visible!
 				try {
 					handleElementNotVisibleException(we).click();
-				} catch (ElementNotVisibleException e2) {
+				} catch (TimeoutException e2) {
 					/* The page might still be dynamically loading despite the
 					 * element already being "viewable." The only option now
 					 * is a "Thread.sleep(); Eww. Call the sleep, then try the
 					 * handler again, with no try catch protection, anything
-					 * after this is a genuine error. */
+					 * after this is a genuine error. Was the page Angular7? */
 					try {
 						Thread.sleep(DomainConstants.local.waitSeconds*1000);
 					} catch (InterruptedException e) {
@@ -883,6 +884,18 @@ public abstract class NiceWebDriver {
 					}
 					handleElementNotVisibleException(we).click();
 				}
+			} catch (WebDriverException e2) {
+				/* The page might still be dynamically loading despite the
+				 * element already being "present." The only option now
+				 * is a "Thread.sleep(); Eww. Call the sleep, then try the
+				 * handler again, with no try catch protection, anything
+				 * after this is a genuine error. Was the page Angular7? */
+				try {
+					Thread.sleep(DomainConstants.local.waitSeconds*1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				handleElementNotVisibleException(we).click();
 			}
 		}
 		return we;
@@ -936,7 +949,7 @@ public abstract class NiceWebDriver {
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Send keys : String version
+ * Send keys : CharSequence... [deduplicate "String" and "Keys[]"]
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -945,19 +958,19 @@ public abstract class NiceWebDriver {
 	 * @param we
 	 * @return
 	 */
-	public WebElement sendKeysToANonNullWebElement(WebElement we, String keyStrokes) {
+	public WebElement sendKeysToANonNullWebElement(WebElement we, CharSequence...  keyStrokes) {
 		if(we != null) {
 			try {
-			we.sendKeys(keyStrokes);
+				we.sendKeys(keyStrokes);
 			} catch(ElementNotInteractableException e1) {
 				try {
 					handleElementNotInteractableException(we).sendKeys(keyStrokes);
-				} catch (ElementNotInteractableException e2) {
+				} catch (TimeoutException e2) {
 					/* The page might still be dynamically loading despite the
 					 * element already being "clickable." The only option now
 					 * is a "Thread.sleep(); Eww. Call the sleep, then try the
 					 * handler again, with no try catch protection, anything
-					 * after this is a genuine error. */
+					 * after this is a genuine error. Was the page Angular7? */
 					try {
 						Thread.sleep(DomainConstants.local.waitSeconds*1000);
 					} catch (InterruptedException e) {
@@ -965,22 +978,29 @@ public abstract class NiceWebDriver {
 					}
 					handleElementNotInteractableException(we).sendKeys(keyStrokes);
 				}
+			} catch (WebDriverException e2) {
+				/* The page might still be dynamically loading despite the
+				 * element already being "present." The only option now
+				 * is a "Thread.sleep(); Eww. Call the sleep, then try the
+				 * handler again, with no try catch protection, anything
+				 * after this is a genuine error. Was the page Angular7? */
+				try {
+					Thread.sleep(DomainConstants.local.waitSeconds*1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				handleElementNotInteractableException(we).sendKeys(keyStrokes);
 			}
 		}
 		return we;
 	}
 	
 	/***
-	 * The string representation of a unicode backspace, if one must be typed
-	 */
-	public static final String unicodekeys_Backspace = "\u0008";
-	
-	/***
 	 * Sends keys to a WebElement found using a CSS Selector
 	 * @param cssSelector
 	 * @return
 	 */
-	public WebElement sendKeysToCSSElementIfExists(String cssSelector, String keyStrokes) {
+	public WebElement sendKeysToCSSElementIfExists(String cssSelector, CharSequence... keyStrokes) {
 		return sendKeysToANonNullWebElement(getWebElementByCSSIfExists(cssSelector),keyStrokes);
 	}
 
@@ -989,7 +1009,7 @@ public abstract class NiceWebDriver {
 	 * @param xpath
 	 * @return
 	 */
-	public WebElement sendKeysToXPathElementIfExists(String xpath, String keyStrokes) {
+	public WebElement sendKeysToXPathElementIfExists(String xpath, CharSequence... keyStrokes) {
 		return sendKeysToANonNullWebElement(getWebElementByXPathIfExists(xpath),keyStrokes);
 	}
 
@@ -998,7 +1018,7 @@ public abstract class NiceWebDriver {
 	 * @param linkText
 	 * @return
 	 */
-	public WebElement sendKeysToLinkTextElementIfExists(String linkText, String keyStrokes) {
+	public WebElement sendKeysToLinkTextElementIfExists(String linkText, CharSequence... keyStrokes) {
 		return sendKeysToANonNullWebElement(getWebElementByLinkTextIfExists(linkText),keyStrokes);
 	}
 
@@ -1007,7 +1027,7 @@ public abstract class NiceWebDriver {
 	 * @param id
 	 * @return
 	 */
-	public WebElement sendKeysToIdElementIfExists(String id, String keyStrokes) {
+	public WebElement sendKeysToIdElementIfExists(String id, CharSequence... keyStrokes) {
 		return sendKeysToANonNullWebElement(getWebElementByIdIfExists(id),keyStrokes);
 	}
 
@@ -1017,72 +1037,123 @@ public abstract class NiceWebDriver {
 	 * @param visibleOnly
 	 * @return
 	 */
-	public WebElement sendKeysToAnchorHrefElementIfExists(String href, String keyStrokes, boolean visibleOnly) {
+	public WebElement sendKeysToAnchorHrefElementIfExists(String href, boolean visibleOnly, CharSequence... keyStrokes) {
 		return sendKeysToANonNullWebElement(getWebElementByAnchorWithHrefIfExists(href,visibleOnly),keyStrokes);
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Send keys : Keys[] version
+ * Scroll the page into view of a WebElement
  */
 ///////////////////////////////////////////////////////////////////////////////
-
+	
 	/***
-	 * Sends keys to a WebElement if it is not null
+	 * Scroll the page into view of a WebElement
 	 * @param we
 	 * @return
 	 */
-	public WebElement sendKeysToANonNullWebElement(WebElement we, Keys[] keyStrokes) {
-		if (we != null) {
-			we.sendKeys(keyStrokes);
+	public WebElement scrollThePageIntoViewOfAWebElement(WebElement we) {
+		jsExecutor.executeScript("arguments[0].scrollIntoView(true);", we);
+		return we;
+	}
+	
+	/***
+	 * Scroll the page into view of a WebElement if it is not null
+	 * @param we
+	 * @return
+	 */
+	public WebElement scrollThePageIntoViewOfANonNullWebElement(WebElement we) {
+		if(we != null) {
+			try {
+				scrollThePageIntoViewOfAWebElement(we);
+			} catch(ElementNotVisibleException e1) {
+				try {
+					scrollThePageIntoViewOfAWebElement(handleElementNotVisibleException(we));
+				} catch (TimeoutException e2) {
+					/* The page might still be dynamically loading despite the
+					 * element already being "clickable." The only option now
+					 * is a "Thread.sleep(); Eww. Call the sleep, then try the
+					 * handler again, with no try catch protection, anything
+					 * after this is a genuine error. Was the page Angular7? */
+					try {
+						Thread.sleep(DomainConstants.local.waitSeconds*1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					scrollThePageIntoViewOfAWebElement(handleElementNotVisibleException(we));
+				}
+			} catch (WebDriverException e2) {
+				/* The page might still be dynamically loading despite the
+				 * element already being "present." The only option now
+				 * is a "Thread.sleep(); Eww. Call the sleep, then try the
+				 * handler again, with no try catch protection, anything
+				 * after this is a genuine error. Was the page Angular7? */
+				try {
+					Thread.sleep(DomainConstants.local.waitSeconds*1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				scrollThePageIntoViewOfAWebElement(handleElementNotVisibleException(we));
+			}
 		}
 		return we;
 	}
 	
 	/***
-	 * Sends keys to a WebElement found using a CSS Selector
+	 * Scroll the page into view of a WebElement found using a CSS Selector
 	 * @param cssSelector
 	 * @return
 	 */
-	public WebElement sendKeysToCSSElementIfExists(String cssSelector, Keys[] keyStrokes) {
-		return sendKeysToANonNullWebElement(getWebElementByCSSIfExists(cssSelector), keyStrokes);
+	public WebElement scrollThePageIntoViewOfACSSElementIfExists(String cssSelector) {
+		return scrollThePageIntoViewOfANonNullWebElement(getWebElementByCSSIfExists(cssSelector));
 	}
 
 	/***
-	 * Sends keys to a WebElement found using an XPath
+	 * Scroll the page into view of a WebElement found using an XPath
 	 * @param xpath
 	 * @return
 	 */
-	public WebElement sendKeysToXPathElementIfExists(String xpath, Keys[] keyStrokes) {
-		return sendKeysToANonNullWebElement(getWebElementByXPathIfExists(xpath), keyStrokes);
+	public WebElement scrollThePageIntoViewOfAnXPathElementIfExists(String xpath) {
+		return scrollThePageIntoViewOfANonNullWebElement(getWebElementByXPathIfExists(xpath));
 	}
 
 	/***
-	 * Sends keys to a WebElement found using a link text
+	 * Scroll the page into view of a WebElement found using a link text
 	 * @param linkText
 	 * @return
 	 */
-	public WebElement sendKeysToLinkTextElementIfExists(String linkText, Keys[] keyStrokes) {
-		return sendKeysToANonNullWebElement(getWebElementByLinkTextIfExists(linkText), keyStrokes);
+	public WebElement scrollThePageIntoViewOfALinkTextElementIfExists(String linkText) {
+		return scrollThePageIntoViewOfANonNullWebElement(getWebElementByLinkTextIfExists(linkText));
 	}
 
 	/***
-	 * Sends keys to a WebElement found using an ID
+	 * Scroll the page into view of a WebElement found using an ID
 	 * @param id
 	 * @return
 	 */
-	public WebElement sendKeysToIdElementIfExists(String id, Keys[] keyStrokes) {
-		return sendKeysToANonNullWebElement(getWebElementByIdIfExists(id), keyStrokes);
+	public WebElement scrollThePageIntoViewOfAnIdElementIfExists(String id) {
+		return scrollThePageIntoViewOfANonNullWebElement(getWebElementByIdIfExists(id));
 	}
 
 	/***
-	 * Sends keys to a WebElement found using an href
+	 * Scroll the page into view of a WebElement found using an href
 	 * @param href
 	 * @param visibleOnly
 	 * @return
 	 */
-	public WebElement sendKeysToAnchorHrefElementIfExists(String href, Keys[] keyStrokes, boolean visibleOnly) {
-		return sendKeysToANonNullWebElement(getWebElementByAnchorWithHrefIfExists(href, visibleOnly), keyStrokes);
+	public WebElement scrollThePageIntoViewOfAnAnchorHrefElementIfExists(String href, boolean visibleOnly) {
+		return scrollThePageIntoViewOfANonNullWebElement(getWebElementByAnchorWithHrefIfExists(href, visibleOnly));
 	}
-
+	
+///////////////////////////////////////////////////////////////////////////////
+/*
+ * Minutiae/Niche functionality
+ */
+///////////////////////////////////////////////////////////////////////////////
+	
+	public WebElement setValueOnInstanceOfAClass(String className, int nthInstance, String valueToSet) {
+		WebElement classInstance = webDriver.findElements(By.cssSelector("."+className)).get(nthInstance);
+		jsExecutor.executeScript("arguments[0]."+className+".setValue(\"" + valueToSet + "\");", classInstance);
+		return classInstance;
+	}
 }

@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -529,9 +528,19 @@ public abstract class baseTest {
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Send keys! : Strings
+ * Send keys! : CharSequence...  [deduplicate "String" and "Keys[]"]
  */
 ///////////////////////////////////////////////////////////////////////////////
+	
+	private WebElement sendKeysToElementNestedIterationOnCharSequences(WebElement we, CharSequence... keyStrokes) throws InterruptedException {
+		for(CharSequence keyStroker : keyStrokes) {
+			for(int charIndex = 0, numChars = keyStroker.length() ; charIndex < numChars ; charIndex++) { 
+				nwd.sendKeysToANonNullWebElement(we,keyStroker.charAt(charIndex)+"");
+				sleepBetweenKeyStrokes();
+			}
+		}
+		return we;
+	}
 	
 	/***
 	 * Sends keys to a WebElement found using a CSS Selector, wrapped with 
@@ -540,13 +549,9 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException 
 	 */
-	public WebElement sendKeysToCSSElementIfExists(String cssSelector, String keyStrokes) throws InterruptedException {
+	public WebElement sendKeysToCSSElementIfExists(String cssSelector, CharSequence... keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToCSSElementIfExists(cssSelector,"");
-		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
-			sleepBetweenKeyStrokes();
-		}
-		return we;
+		return sendKeysToElementNestedIterationOnCharSequences(we,keyStrokes);
 	}
 
 	/***
@@ -556,13 +561,9 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException 
 	 */
-	public WebElement sendKeysToXPathElementIfExists(String xpath, String keyStrokes) throws InterruptedException {
+	public WebElement sendKeysToXPathElementIfExists(String xpath, CharSequence... keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToXPathElementIfExists(xpath,"");
-		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
-			sleepBetweenKeyStrokes();
-		}
-		return we;
+		return sendKeysToElementNestedIterationOnCharSequences(we,keyStrokes);
 	}
 
 	/***
@@ -572,13 +573,9 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException 
 	 */
-	public WebElement sendKeysToLinkTextElementIfExists(String linkText, String keyStrokes) throws InterruptedException {
+	public WebElement sendKeysToLinkTextElementIfExists(String linkText, CharSequence... keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToLinkTextElementIfExists(linkText,"");
-		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
-			sleepBetweenKeyStrokes();
-		}
-		return we;
+		return sendKeysToElementNestedIterationOnCharSequences(we,keyStrokes);
 	}
 
 	/***
@@ -588,13 +585,9 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException 
 	 */
-	public WebElement sendKeysToIdElementIfExists(String id, String keyStrokes) throws InterruptedException {
+	public WebElement sendKeysToIdElementIfExists(String id, CharSequence... keyStrokes) throws InterruptedException {
 		WebElement we = nwd.sendKeysToIdElementIfExists(id,"");
-		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
-			sleepBetweenKeyStrokes();
-		}
-		return we;
+		return sendKeysToElementNestedIterationOnCharSequences(we,keyStrokes);
 	}
 
 	/***
@@ -605,105 +598,14 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException 
 	 */
-	public WebElement sendKeysToAnchorHrefElementIfExists(String href, String keyStrokes, boolean visibleOnly) throws InterruptedException {
-		WebElement we = nwd.sendKeysToAnchorHrefElementIfExists(href,"",visibleOnly);
-		for(char keyStroke : keyStrokes.toCharArray()) {
-			nwd.sendKeysToANonNullWebElement(we,keyStroke+"");
-			sleepBetweenKeyStrokes();
-		}
-		return we;
+	public WebElement sendKeysToAnchorHrefElementIfExists(String href, boolean visibleOnly, CharSequence... keyStrokes) throws InterruptedException {
+		WebElement we = nwd.sendKeysToAnchorHrefElementIfExists(href,visibleOnly,"");
+		return sendKeysToElementNestedIterationOnCharSequences(we,keyStrokes);
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Send keys! : Keys[]
- */
-///////////////////////////////////////////////////////////////////////////////
-
-	/***
-	 * Sends keys to a WebElement found using a CSS Selector, wrapped with
-	 * demonstration sleeps.
-	 * @param cssSelector
-	 * @return
-	 * @throws InterruptedException
-	 */
-	public WebElement sendKeysToCSSElementIfExists(String cssSelector, Keys[] keyStrokes) throws InterruptedException {
-		WebElement we = nwd.sendKeysToCSSElementIfExists(cssSelector, "");
-		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
-			sleepBetweenKeyStrokes();
-		}
-		return we;
-	}
-
-	/***
-	 * Sends keys to a WebElement found using an XPath, wrapped with demonstration
-	 * sleeps.
-	 * @param xpath
-	 * @return
-	 * @throws InterruptedException
-	 */
-	public WebElement sendKeysToXPathElementIfExists(String xpath, Keys[] keyStrokes) throws InterruptedException {
-		WebElement we = nwd.sendKeysToXPathElementIfExists(xpath, "");
-		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
-			sleepBetweenKeyStrokes();
-		}
-		return we;
-	}
-
-	/***
-	 * Sends keys to a WebElement found using a link text, wrapped with
-	 * demonstration sleeps.
-	 * @param linkText
-	 * @return
-	 * @throws InterruptedException
-	 */
-	public WebElement sendKeysToLinkTextElementIfExists(String linkText, Keys[] keyStrokes) throws InterruptedException {
-		WebElement we = nwd.sendKeysToLinkTextElementIfExists(linkText, "");
-		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
-			sleepBetweenKeyStrokes();
-		}
-		return we;
-	}
-
-	/***
-	 * Sends keys to a WebElement found using an ID, wrapped with demonstration
-	 * sleeps.
-	 * @param id
-	 * @return
-	 * @throws InterruptedException
-	 */
-	public WebElement sendKeysToIdElementIfExists(String id, Keys[] keyStrokes) throws InterruptedException {
-		WebElement we = nwd.sendKeysToIdElementIfExists(id, "");
-		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
-			sleepBetweenKeyStrokes();
-		}
-		return we;
-	}
-
-	/***
-	 * Sends keys to a WebElement found using an href, wrapped with demonstration
-	 * sleeps.
-	 * @param href
-	 * @param visibleOnly
-	 * @return
-	 * @throws InterruptedException
-	 */
-	public WebElement sendKeysToAnchorHrefElementIfExists(String href, Keys[] keyStrokes, boolean visibleOnly) throws InterruptedException {
-		WebElement we = nwd.sendKeysToAnchorHrefElementIfExists(href, "", visibleOnly);
-		for (Keys keyStroke : keyStrokes) {
-			nwd.sendKeysToANonNullWebElement(we, new Keys[]{keyStroke});
-			sleepBetweenKeyStrokes();
-		}
-		return we;
-	}
-	
-///////////////////////////////////////////////////////////////////////////////
-/*
- * Send keys after clicking an element! : Strings
+ * Send keys after clicking an element! : CharSequence...
  */
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -714,7 +616,7 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToCSSElementIfExists(String cssSelector, String keyStrokes) throws InterruptedException {
+	public WebElement sendKeysAfterClickingToCSSElementIfExists(String cssSelector, CharSequence... keyStrokes) throws InterruptedException {
 		clickOnCSSElementIfExists(cssSelector).clear();
 		return sendKeysToCSSElementIfExists(cssSelector,keyStrokes);
 	}
@@ -726,7 +628,7 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToXPathElementIfExists(String xpath, String keyStrokes) throws InterruptedException {
+	public WebElement sendKeysAfterClickingToXPathElementIfExists(String xpath, CharSequence... keyStrokes) throws InterruptedException {
 		clickOnXPathElementIfExists(xpath).clear();
 		return sendKeysToXPathElementIfExists(xpath,keyStrokes);
 	}
@@ -738,7 +640,7 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToLinkTextElementIfExists(String linkText, String keyStrokes) throws InterruptedException {
+	public WebElement sendKeysAfterClickingToLinkTextElementIfExists(String linkText, CharSequence... keyStrokes) throws InterruptedException {
 		clickOnLinkTextElementIfExists(linkText).clear();
 		return sendKeysToLinkTextElementIfExists(linkText,keyStrokes);
 	}
@@ -750,7 +652,7 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToIdElementIfExists(String id, String keyStrokes) throws InterruptedException {
+	public WebElement sendKeysAfterClickingToIdElementIfExists(String id, CharSequence... keyStrokes) throws InterruptedException {
 		clickOnIdElementIfExists(id).clear();
 		return sendKeysToIdElementIfExists(id,keyStrokes);
 	}
@@ -763,76 +665,61 @@ public abstract class baseTest {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToAnchorHrefElementIfExists(String href, String keyStrokes, boolean visibleOnly) throws InterruptedException {
+	public WebElement sendKeysAfterClickingToAnchorHrefElementIfExists(String href, boolean visibleOnly, CharSequence... keyStrokes) throws InterruptedException {
 		clickOnAnchorHrefElementIfExists(href,visibleOnly).clear();
-		return sendKeysToAnchorHrefElementIfExists(href,keyStrokes,visibleOnly);
+		return sendKeysToAnchorHrefElementIfExists(href,visibleOnly,keyStrokes);
 	}
 
 ///////////////////////////////////////////////////////////////////////////////
 /*
- * Send keys after clicking an element! : Keys[]
+ * Scroll!
  */
 ///////////////////////////////////////////////////////////////////////////////
 
 	/***
-	 * Sends keys to a WebElement found using a CSS Selector, wrapped with
-	 * demonstration sleeps, after clicking the WebElement, and clearing it.
+	 * Scroll the page into view of a WebElement found using a CSS Selector
 	 * @param cssSelector
 	 * @return
-	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToCSSElementIfExists(String cssSelector, Keys[] keyStrokes) throws InterruptedException {
-		clickOnCSSElementIfExists(cssSelector).clear();
-		return sendKeysToCSSElementIfExists(cssSelector,keyStrokes);
+	public WebElement scrollThePageIntoViewOfACSSElementIfExists(String cssSelector) {
+		return nwd.scrollThePageIntoViewOfACSSElementIfExists(cssSelector);
 	}
 
 	/***
-	 * Sends keys to a WebElement found using an XPath, wrapped with demonstration
-	 * sleeps, after clicking the WebElement, and clearing it.
+	 * Scroll the page into view of a WebElement found using an XPath
 	 * @param xpath
 	 * @return
-	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToXPathElementIfExists(String xpath, Keys[] keyStrokes) throws InterruptedException {
-		clickOnXPathElementIfExists(xpath).clear();
-		return sendKeysToXPathElementIfExists(xpath,keyStrokes);
+	public WebElement scrollThePageIntoViewOfAnXPathElementIfExists(String xpath) {
+		return nwd.scrollThePageIntoViewOfAnXPathElementIfExists(xpath);
 	}
 
 	/***
-	 * Sends keys to a WebElement found using a link text, wrapped with
-	 * demonstration sleeps, after clicking the WebElement, and clearing it.
+	 * Scroll the page into view of a WebElement found using a link text
 	 * @param linkText
 	 * @return
-	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToLinkTextElementIfExists(String linkText, Keys[] keyStrokes) throws InterruptedException {
-		clickOnLinkTextElementIfExists(linkText).clear();
-		return sendKeysToLinkTextElementIfExists(linkText,keyStrokes);
+	public WebElement scrollThePageIntoViewOfALinkTextElementIfExists(String linkText) {
+		return nwd.scrollThePageIntoViewOfALinkTextElementIfExists(linkText);
 	}
 
 	/***
-	 * Sends keys to a WebElement found using an ID, wrapped with demonstration
-	 * sleeps, after clicking the WebElement, and clearing it.
+	 * Scroll the page into view of a WebElement found using an ID
 	 * @param id
 	 * @return
-	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToIdElementIfExists(String id, Keys[] keyStrokes) throws InterruptedException {
-		clickOnIdElementIfExists(id).clear();
-		return sendKeysToIdElementIfExists(id,keyStrokes);
+	public WebElement scrollThePageIntoViewOfAnIdElementIfExists(String id) {
+		return nwd.scrollThePageIntoViewOfAnIdElementIfExists(id);
 	}
 
 	/***
-	 * Sends keys to a WebElement found using an href, wrapped with demonstration
-	 * sleeps, after clicking the WebElement, and clearing it.
+	 * Scroll the page into view of a WebElement found using an href
 	 * @param href
 	 * @param visibleOnly
 	 * @return
-	 * @throws InterruptedException
 	 */
-	public WebElement sendKeysAfterClickingToAnchorHrefElementIfExists(String href, Keys[] keyStrokes, boolean visibleOnly) throws InterruptedException {
-		clickOnAnchorHrefElementIfExists(href,visibleOnly).clear();
-		return sendKeysToAnchorHrefElementIfExists(href,keyStrokes,visibleOnly);
+	public WebElement scrollThePageIntoViewOfAnAnchorHrefElementIfExists(String href, boolean visibleOnly) {
+		return nwd.scrollThePageIntoViewOfAnAnchorHrefElementIfExists(href,visibleOnly);
 	}
 	
 ///////////////////////////////////////////////////////////////////////////////
