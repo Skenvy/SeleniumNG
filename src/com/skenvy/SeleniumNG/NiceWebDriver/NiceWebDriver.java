@@ -871,7 +871,7 @@ public abstract class NiceWebDriver {
 				//Make sure we wait until it is visible!
 				try {
 					handleElementNotVisibleException(we).click();
-				} catch (TimeoutException e2) {
+				} catch (WebDriverException e2) {
 					/* The page might still be dynamically loading despite the
 					 * element already being "viewable." The only option now
 					 * is a "Thread.sleep(); Eww. Call the sleep, then try the
@@ -965,7 +965,7 @@ public abstract class NiceWebDriver {
 			} catch(ElementNotInteractableException e1) {
 				try {
 					handleElementNotInteractableException(we).sendKeys(keyStrokes);
-				} catch (TimeoutException e2) {
+				} catch (WebDriverException e2) {
 					/* The page might still be dynamically loading despite the
 					 * element already being "clickable." The only option now
 					 * is a "Thread.sleep(); Eww. Call the sleep, then try the
@@ -1069,7 +1069,7 @@ public abstract class NiceWebDriver {
 			} catch(ElementNotVisibleException e1) {
 				try {
 					scrollThePageIntoViewOfAWebElement(handleElementNotVisibleException(we));
-				} catch (TimeoutException e2) {
+				} catch (WebDriverException e2) {
 					/* The page might still be dynamically loading despite the
 					 * element already being "clickable." The only option now
 					 * is a "Thread.sleep(); Eww. Call the sleep, then try the
@@ -1151,9 +1151,43 @@ public abstract class NiceWebDriver {
  */
 ///////////////////////////////////////////////////////////////////////////////
 	
+	/***
+	 * Invokes the JavascriptExecutor to explicitly set the internal value of
+	 * some WebElement
+	 * @param className
+	 * @param nthInstance
+	 * @param valueToSet
+	 * @return
+	 */
 	public WebElement setValueOnInstanceOfAClass(String className, int nthInstance, String valueToSet) {
 		WebElement classInstance = webDriver.findElements(By.cssSelector("."+className)).get(nthInstance);
 		jsExecutor.executeScript("arguments[0]."+className+".setValue(\"" + valueToSet + "\");", classInstance);
 		return classInstance;
 	}
+	
+	/***
+	 * Scrolls into view of a WebElement found by XPath, then scrolls inside of
+	 * that WebElement, until a WebElement it contains is also visible.
+	 * @param containingElementXPath
+	 * @param internalElementXPath
+	 * @param scrollSpeed
+	 * @return
+	 */
+	public WebElement scrollInsideOfAnXPathWebElementFromTopToBottomUntilAnotherXPathBecomesVisible(String containingElementXPath, String internalElementXPath, int scrollSpeed) {
+		WebElement containingElement = scrollThePageIntoViewOfAnXPathElementIfExists(containingElementXPath);
+		WebElement internalElement = getWebElementByXPathIfExists(internalElementXPath);
+		int scroller = 0;
+		int maxScroll = containingElement.getSize().height;
+		while(!internalElement.isDisplayed()){
+			if(scroller > maxScroll){
+				break;
+			} else {
+				internalElement = getWebElementByXPathIfExists(internalElementXPath);
+				jsExecutor.executeScript("arguments[0].scrollTop=arguments[1]",containingElement,scroller);
+				scroller+=scrollSpeed;
+			}
+		}
+		return internalElement;
+	}
+	
 }
