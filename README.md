@@ -12,10 +12,10 @@ Copy and paste a local instance of the configuration XML example that comes with
 ## And Override the path to the configuration
 As the configuration can be made as unique or globally as you want, you may want individual classes that subclass the **baseTest** to be capable of overriding the ***getPathToDomainConstantsConfig()*** to maintain configuration unique to individual classes, which may be beneficial, although the safest approach is to have a single intermediary abstract class that subclasses the **baseTest** and overrides the ***getPathToDomainConstantsConfig()*** (**and "final"'ises it**) similar to the below, then all local test classes should subclass your own intermediary base class;
 ```java
-  @Override //sub of baseTest
-	public String getPathToDomainConstantsConfig() {
-		return System.getProperty("user.dir")+"\\config_test.xml";
-	}
+@Override //sub of baseTest
+public final String getPathToDomainConstantsConfig() {
+	return System.getProperty("user.dir")+"\\config_test.xml";
+}
 ```
 # The main classes
 ## NiceWebDriver
